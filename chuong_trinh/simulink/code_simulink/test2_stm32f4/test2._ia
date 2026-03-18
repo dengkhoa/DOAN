@@ -1,0 +1,5 @@
+--cpu Cortex-M4.fp.sp -g --apcs=interwork 
+-I.\RTE\_test
+-I"D:\keil C\ARM\CMSIS\6.2.0\CMSIS\Core\Include"
+--pd "__UVISION_VERSION SETA 531" --pd "_RTE_ SETA 1" --pd "STM32F407xx SETA 1" --pd "_RTE_ SETA 1"
+--list test2.lst --xref -o ..\..\..\code_simulink\test2_stm32f4\test2.o --depend ..\..\..\code_simulink\test2_stm32f4\test2.d "..\..\..\code_simulink\test2_stm32f4\test2.axf"

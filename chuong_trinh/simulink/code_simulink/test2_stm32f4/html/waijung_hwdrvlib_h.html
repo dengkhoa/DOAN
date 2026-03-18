@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="./js/coder_app.js"></script>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="./rtwreport_utils.js"></script>
+<script type="text/javascript" src="./rtwannotate.js"></script>
+<link rel="stylesheet" type="text/css" href="./css/coder_app.css"/>
+</head>
+<body onload="srcFileOnload();">
+<pre id="code">
+<table class="code" id="codeTbl">
+<tr name="1" id="1">
+<td>1</td><td><span class="ct">/*</span></td></tr>
+<tr name="2" id="2">
+<td>2</td><td><span class="ct"> * File: waijung_hwdrvlib.h</span></td></tr>
+<tr name="3" id="3">
+<td>3</td><td><span class="ct"> *</span></td></tr>
+<tr name="4" id="4">
+<td>4</td><td><span class="ct"> * Created with Waijung Blockset</span></td></tr>
+<tr name="5" id="5">
+<td>5</td><td><span class="ct"> *</span></td></tr>
+<tr name="6" id="6">
+<td>6</td><td><span class="ct"> * Real-Time Workshop code generated for Simulink model test2.</span></td></tr>
+<tr name="7" id="7">
+<td>7</td><td><span class="ct"> *</span></td></tr>
+<tr name="8" id="8">
+<td>8</td><td><span class="ct"> * Model version                        : 1.22</span></td></tr>
+<tr name="9" id="9">
+<td>9</td><td><span class="ct"> * Real-Time Workshop file version      : 8.10 (R2016a) 10-Feb-2016</span></td></tr>
+<tr name="10" id="10">
+<td>10</td><td><span class="ct"> * Real-Time Workshop file generated on : Thu Oct 30 16:00:35 2025</span></td></tr>
+<tr name="11" id="11">
+<td>11</td><td><span class="ct"> * TLC version                          : 8.10 (Jan 14 2016)</span></td></tr>
+<tr name="12" id="12">
+<td>12</td><td><span class="ct"> * C/C++ source code generated on       : Thu Oct 30 16:00:35 2025</span></td></tr>
+<tr name="13" id="13">
+<td>13</td><td><span class="ct"> *</span></td></tr>
+<tr name="14" id="14">
+<td>14</td><td><span class="ct"> * Target selection: stm32f4.tlc</span></td></tr>
+<tr name="15" id="15">
+<td>15</td><td><span class="ct"> * Embedded hardware selection: ARM Compatible-&gt;ARM 10</span></td></tr>
+<tr name="16" id="16">
+<td>16</td><td><span class="ct"> * Code generation objectives: Unspecified</span></td></tr>
+<tr name="17" id="17">
+<td>17</td><td><span class="ct"> * Validation result: Not run</span></td></tr>
+<tr name="18" id="18">
+<td>18</td><td><span class="ct"> */</span></td></tr>
+<tr name="19" id="19">
+<td>19</td><td></td></tr>
+<tr name="20" id="20">
+<td>20</td><td><span class="pp">#ifndef</span> <a id="20c9" class="tk">RTW_HEADER_waijung_hwdrvlib_h_</a></td></tr>
+<tr name="21" id="21">
+<td>21</td><td><span class="pp">#define</span> <a id="21c9" class="tk">RTW_HEADER_waijung_hwdrvlib_h_</a></td></tr>
+<tr name="22" id="22">
+<td>22</td><td><span class="pp">#include &lt;string.h&gt;</span></td></tr>
+<tr name="23" id="23">
+<td>23</td><td><span class="pp">#include "rtwtypes.h"</span></td></tr>
+<tr name="24" id="24">
+<td>24</td><td><span class="pp">#include "stm32f4xx.h"</span></td></tr>
+<tr name="25" id="25">
+<td>25</td><td></td></tr>
+<tr name="26" id="26">
+<td>26</td><td><span class="ct">/* ########################################################################</span></td></tr>
+<tr name="27" id="27">
+<td>27</td><td><span class="ct"> * Name: &lt;Root&gt;/Regular ADC</span></td></tr>
+<tr name="28" id="28">
+<td>28</td><td><span class="ct"> * Id: RegularADC</span></td></tr>
+<tr name="29" id="29">
+<td>29</td><td><span class="ct"> * ########################################################################</span></td></tr>
+<tr name="30" id="30">
+<td>30</td><td><span class="ct"> */</span></td></tr>
+<tr name="31" id="31">
+<td>31</td><td><span class="ct">/* Conversion result */</span></td></tr>
+<tr name="32" id="32">
+<td>32</td><td><span class="kw">extern</span> <a id="32c8" class="tk">uint16_t</a> <a id="32c17" class="tk">RegularADC_ConvertedValue</a>[];</td></tr>
+<tr name="33" id="33">
+<td>33</td><td></td></tr>
+<tr name="34" id="34">
+<td>34</td><td><span class="ct">/* ADC1 Configuration */</span></td></tr>
+<tr name="35" id="35">
+<td>35</td><td><span class="pp">#define</span> <a id="35c9" class="tk">RegularADC_ADC_DR_ADDRESS</a>      <a id="35c40" class="tk">ADC1_DR_ADDRESS</a></td></tr>
+<tr name="36" id="36">
+<td>36</td><td></td></tr>
+<tr name="37" id="37">
+<td>37</td><td><span class="ct">/* ADC1 DR Address */</span></td></tr>
+<tr name="38" id="38">
+<td>38</td><td><span class="pp">#define</span> <a id="38c9" class="tk">ADC1_DR_ADDRESS</a>                ((<a id="38c42" class="tk">uint32_t</a>)0x4001204C)</td></tr>
+<tr name="39" id="39">
+<td>39</td><td></td></tr>
+<tr name="40" id="40">
+<td>40</td><td><span class="ct">/* DMA */</span></td></tr>
+<tr name="41" id="41">
+<td>41</td><td><span class="pp">#define</span> <a id="41c9" class="tk">RegularADC_DMA_CHANNEL</a>         <a id="41c40" class="tk">DMA_Channel_0</a></td></tr>
+<tr name="42" id="42">
+<td>42</td><td><span class="pp">#define</span> <a id="42c9" class="tk">RegularADC_DMA_STREAM</a>          <a id="42c40" class="tk">DMA2_Stream4</a></td></tr>
+<tr name="43" id="43">
+<td>43</td><td><span class="pp">#define</span> <a id="43c9" class="tk">RegularADC_DMA_TC_FLAG</a>         <a id="43c40" class="tk">DMA_FLAG_TCIF4</a></td></tr>
+<tr name="44" id="44">
+<td>44</td><td></td></tr>
+<tr name="45" id="45">
+<td>45</td><td><span class="ct">/*</span></td></tr>
+<tr name="46" id="46">
+<td>46</td><td><span class="ct"> * Define PWM Generation Scale Factor</span></td></tr>
+<tr name="47" id="47">
+<td>47</td><td><span class="ct"> * From TIMx_CCRx = TIMx_ARR * (Duty Cycle / 100)</span></td></tr>
+<tr name="48" id="48">
+<td>48</td><td><span class="ct"> * TIMx_CCRx = (TIMx_ARR/100) * Duty Cycle</span></td></tr>
+<tr name="49" id="49">
+<td>49</td><td><span class="ct"> */</span></td></tr>
+<tr name="50" id="50">
+<td>50</td><td><span class="pp">#define</span> <a id="50c9" class="tk">BasicPWM_TIM4_ARR</a>              64615</td></tr>
+<tr name="51" id="51">
+<td>51</td><td><span class="pp">#define</span> <a id="51c9" class="tk">BasicPWM_SF</a>                    ((<span class="kw">float</span>)<a id="51c48" class="tk">BasicPWM_TIM4_ARR</a> <a id="51c66" class="tk">/</a> 100)</td></tr>
+<tr name="52" id="52">
+<td>52</td><td></td></tr>
+<tr name="53" id="53">
+<td>53</td><td><span class="ct">/*</span></td></tr>
+<tr name="54" id="54">
+<td>54</td><td><span class="ct"> * Bit banding</span></td></tr>
+<tr name="55" id="55">
+<td>55</td><td><span class="ct"> *</span></td></tr>
+<tr name="56" id="56">
+<td>56</td><td><span class="ct"> * The Cortex memory map includes two bit-band regions.</span></td></tr>
+<tr name="57" id="57">
+<td>57</td><td><span class="ct"> * These regions map each word in an alias region of memory to a bit in</span></td></tr>
+<tr name="58" id="58">
+<td>58</td><td><span class="ct"> * a bit-band region of memory. Writing to a word in the alias region</span></td></tr>
+<tr name="59" id="59">
+<td>59</td><td><span class="ct"> * has the same effect as a read-modify-write operation on the targeted bit</span></td></tr>
+<tr name="60" id="60">
+<td>60</td><td><span class="ct"> * in the bit-band region.</span></td></tr>
+<tr name="61" id="61">
+<td>61</td><td><span class="ct"> *</span></td></tr>
+<tr name="62" id="62">
+<td>62</td><td><span class="ct"> * In the STM32F4xxx both peripheral registers and SRAM are mapped in</span></td></tr>
+<tr name="63" id="63">
+<td>63</td><td><span class="ct"> * a bit-band region. This allows single bit-band write and read operations</span></td></tr>
+<tr name="64" id="64">
+<td>64</td><td><span class="ct"> * to be performed.</span></td></tr>
+<tr name="65" id="65">
+<td>65</td><td><span class="ct"> *</span></td></tr>
+<tr name="66" id="66">
+<td>66</td><td><span class="ct"> * A mapping formula shows how to reference each word in the alias region</span></td></tr>
+<tr name="67" id="67">
+<td>67</td><td><span class="ct"> * to a corresponding bit in the bit-band region. The mapping formula is:</span></td></tr>
+<tr name="68" id="68">
+<td>68</td><td><span class="ct"> * bit_word_addr = bit_band_base + (byte_offset x 32) + (bit_number × 4)</span></td></tr>
+<tr name="69" id="69">
+<td>69</td><td><span class="ct"> *</span></td></tr>
+<tr name="70" id="70">
+<td>70</td><td><span class="ct"> * BB_base      is the base address of the bit-band region for a register. (PERIPH_BB_BASE at 0x42000000 or SRAM_BB_BASE at 0x22000000)</span></td></tr>
+<tr name="71" id="71">
+<td>71</td><td><span class="ct"> * Reg_base     is the base address of a register in the memory region. (PERIPH_BASE at 0x40000000 or SRAM_BASE at 0x20000000)</span></td></tr>
+<tr name="72" id="72">
+<td>72</td><td><span class="ct"> * Register     is a register in the memory region that contains the targeted bit.</span></td></tr>
+<tr name="73" id="73">
+<td>73</td><td><span class="ct"> * Bit_number   is the targeted bit number (0 - 31).</span></td></tr>
+<tr name="74" id="74">
+<td>74</td><td><span class="ct"> *</span></td></tr>
+<tr name="75" id="75">
+<td>75</td><td><span class="ct"> * PERIPH_BB_BASE, SRAM_BB_BASE, PERIPH_BASE, and SRAM_BASE are defined in stm32f10x.h</span></td></tr>
+<tr name="76" id="76">
+<td>76</td><td><span class="ct"> *</span></td></tr>
+<tr name="77" id="77">
+<td>77</td><td><span class="ct"> * Example for determining bit banding bit.</span></td></tr>
+<tr name="78" id="78">
+<td>78</td><td><span class="ct"> * Determine DMA Transfer Complete Flag using bit banding.</span></td></tr>
+<tr name="79" id="79">
+<td>79</td><td><span class="ct"> * TCIFx is the flag for DMA Channel x</span></td></tr>
+<tr name="80" id="80">
+<td>80</td><td><span class="ct"> * This bit is set by hardware. It is cleared by software writing 1 to</span></td></tr>
+<tr name="81" id="81">
+<td>81</td><td><span class="ct"> * the corresponding bit in the DMA_IFCR register.</span></td></tr>
+<tr name="82" id="82">
+<td>82</td><td><span class="ct"> * TCIFx = 0: No transfer complete (TC) event on channel x</span></td></tr>
+<tr name="83" id="83">
+<td>83</td><td><span class="ct"> * TCIFx = 1: A transfer complete (TC) event occurred on channel x</span></td></tr>
+<tr name="84" id="84">
+<td>84</td><td><span class="ct"> *</span></td></tr>
+<tr name="85" id="85">
+<td>85</td><td><span class="ct"> * DMA Channel:       1 2 3  4  5  6  7</span></td></tr>
+<tr name="86" id="86">
+<td>86</td><td><span class="ct"> * Flag bit position: 1 5 9 13 17 21 25 (in DMA_ISR register)</span></td></tr>
+<tr name="87" id="87">
+<td>87</td><td><span class="ct"> * (For DMA2 Channel 6 and 7 is irrelevant since it only has 5 channels.)</span></td></tr>
+<tr name="88" id="88">
+<td>88</td><td><span class="ct"> *</span></td></tr>
+<tr name="89" id="89">
+<td>89</td><td><span class="ct"> * CTCIFx: Channel x transfer complete clear (x = 1 ..7)</span></td></tr>
+<tr name="90" id="90">
+<td>90</td><td><span class="ct"> * This bit is set and cleared by software.</span></td></tr>
+<tr name="91" id="91">
+<td>91</td><td><span class="ct"> * CTCIFx = 0: No effect</span></td></tr>
+<tr name="92" id="92">
+<td>92</td><td><span class="ct"> * CTCIFx = 1: Clear the corresponding TCIF flag in the DMA_ISR register</span></td></tr>
+<tr name="93" id="93">
+<td>93</td><td><span class="ct"> *</span></td></tr>
+<tr name="94" id="94">
+<td>94</td><td><span class="ct"> */</span></td></tr>
+<tr name="95" id="95">
+<td>95</td><td><span class="pp">#define</span> <a id="95c9" class="tk">BitBanding</a>(<a id="95c20" class="tk">Register</a>, <a id="95c30" class="tk">Bit_number</a>, <a id="95c42" class="tk">Reg_base</a>, <a id="95c52" class="tk">BB_base</a>) ((<span class="kw">volatile</span> <a id="95c72" class="tk">uint32_t</a><a id="95c80" class="tk">*</a>) ((<a id="95c85" class="tk">BB_base</a>) <a id="95c94" class="tk">+</a> (((<a id="95c99" class="tk">uint32_t</a>) <a id="95c109" class="tk">&amp;</a>(<a id="95c111" class="tk">Register</a>)) <a id="95c122" class="tk">-</a> ((<a id="95c126" class="tk">Reg_base</a>))<a id="95c136" class="tk">&lt;&lt;</a>5) <a id="95c141" class="tk">+</a> ((<a id="95c145" class="tk">Bit_number</a>)<a id="95c156" class="tk">&lt;&lt;</a>2)))</td></tr>
+<tr name="96" id="96">
+<td>96</td><td><span class="pp">#define</span> <a id="96c9" class="tk">Peripheral_BB</a>(<a id="96c23" class="tk">Register</a>, <a id="96c33" class="tk">Bit_number</a>) <a id="96c45" class="tk">BitBanding</a>(<a id="96c56" class="tk">Register</a>, <a id="96c66" class="tk">Bit_number</a>, <a id="96c78" class="tk">PERIPH_BASE</a>, <a id="96c91" class="tk">PERIPH_BB_BASE</a>)</td></tr>
+<tr name="97" id="97">
+<td>97</td><td><span class="pp">#define</span> <a id="97c9" class="tk">SRAM_BB</a>(<a id="97c17" class="tk">Register</a>, <a id="97c27" class="tk">Bit_number</a>)  <a id="97c40" class="tk">BitBanding</a>(<a id="97c51" class="tk">Register</a>, <a id="97c61" class="tk">Bit_number</a>, <a id="97c73" class="tk">SRAM_BASE</a>, <a id="97c84" class="tk">SRAM_BB_BASE</a>)</td></tr>
+<tr name="98" id="98">
+<td>98</td><td></td></tr>
+<tr name="99" id="99">
+<td>99</td><td><span class="ct">/*</span></td></tr>
+<tr name="100" id="100">
+<td>100</td><td><span class="ct"> * Sample usage:</span></td></tr>
+<tr name="101" id="101">
+<td>101</td><td><span class="ct"> * USART1-&gt;SR can be found from "stm32f4xx.h" and USART_FLAG_TC (6) can be found from "stm32f4xx_usart.h"</span></td></tr>
+<tr name="102" id="102">
+<td>102</td><td><span class="ct"> * #define USART1_TC Peripheral_BB(USART1-&gt;SR, 6) USART_SR.TC bit</span></td></tr>
+<tr name="103" id="103">
+<td>103</td><td><span class="ct"> *</span></td></tr>
+<tr name="104" id="104">
+<td>104</td><td><span class="ct"> * Another example:</span></td></tr>
+<tr name="105" id="105">
+<td>105</td><td><span class="ct"> * #define GPIOC_8 Peripheral_BB(GPIOC-&gt;ODR, 8)</span></td></tr>
+<tr name="106" id="106">
+<td>106</td><td><span class="ct"> * *GPIOC_8 = 1;</span></td></tr>
+<tr name="107" id="107">
+<td>107</td><td><span class="ct"> */</span></td></tr>
+<tr name="108" id="108">
+<td>108</td><td></td></tr>
+<tr name="109" id="109">
+<td>109</td><td><span class="ct">/*</span></td></tr>
+<tr name="110" id="110">
+<td>110</td><td><span class="ct"> * Systick is configured such that the SysTick interrupt every 5.0E-6 sec</span></td></tr>
+<tr name="111" id="111">
+<td>111</td><td><span class="ct"> * which is the base sample time of the system.</span></td></tr>
+<tr name="112" id="112">
+<td>112</td><td><span class="ct"> */</span></td></tr>
+<tr name="113" id="113">
+<td>113</td><td><span class="pp">#define</span> <a id="113c9" class="tk">SYSTICKRELOADVALUE</a>             8400</td></tr>
+<tr name="114" id="114">
+<td>114</td><td></td></tr>
+<tr name="115" id="115">
+<td>115</td><td><span class="ct">/*</span></td></tr>
+<tr name="116" id="116">
+<td>116</td><td><span class="ct"> * HCLK (Hz)</span></td></tr>
+<tr name="117" id="117">
+<td>117</td><td><span class="ct"> */</span></td></tr>
+<tr name="118" id="118">
+<td>118</td><td><span class="pp">#define</span> <a id="118c9" class="tk">HCLK</a>                           168000000</td></tr>
+<tr name="119" id="119">
+<td>119</td><td></td></tr>
+<tr name="120" id="120">
+<td>120</td><td><span class="ct">/*</span></td></tr>
+<tr name="121" id="121">
+<td>121</td><td><span class="ct"> * Each Systick counter is TIMEPERSYSTICK sec.</span></td></tr>
+<tr name="122" id="122">
+<td>122</td><td><span class="ct"> */</span></td></tr>
+<tr name="123" id="123">
+<td>123</td><td><span class="pp">#define</span> <a id="123c9" class="tk">TIMEPERSYSTICK</a>                 5.0E-6 <a id="123c47" class="tk">/</a> 8400</td></tr>
+<tr name="124" id="124">
+<td>124</td><td></td></tr>
+<tr name="125" id="125">
+<td>125</td><td><span class="ct">/* ########################################################################</span></td></tr>
+<tr name="126" id="126">
+<td>126</td><td><span class="ct"> * Timer</span></td></tr>
+<tr name="127" id="127">
+<td>127</td><td><span class="ct"> * ########################################################################</span></td></tr>
+<tr name="128" id="128">
+<td>128</td><td><span class="ct"> */</span></td></tr>
+<tr name="129" id="129">
+<td>129</td><td><span class="pp">#define</span> <a id="129c9" class="tk">SYS_CURRENT_TICK</a>               (<a id="129c41" class="tk">SysTick</a>-&gt;<a id="129c50" class="tk">VAL</a>)</td></tr>
+<tr name="130" id="130">
+<td>130</td><td><span class="pp">#define</span> <a id="130c9" class="tk">SYS_TICKSTEP</a>                   5.0E-6f</td></tr>
+<tr name="131" id="131">
+<td>131</td><td></td></tr>
+<tr name="132" id="132">
+<td>132</td><td><span class="kw">typedef</span> <span class="kw">struct</span> <span class="br">{</span></td></tr>
+<tr name="133" id="133">
+<td>133</td><td>  <a id="133c3" class="tk">uint32_t</a> <a id="133c12" class="tk">start</a>;</td></tr>
+<tr name="134" id="134">
+<td>134</td><td>  <a id="134c3" class="tk">uint32_t</a> <a id="134c12" class="tk">length</a>;</td></tr>
+<tr name="135" id="135">
+<td>135</td><td><span class="br">}</span> <a id="135c3" class="tk">SYS_TIMER_STRUCT</a>;</td></tr>
+<tr name="136" id="136">
+<td>136</td><td></td></tr>
+<tr name="137" id="137">
+<td>137</td><td><span class="pp">#define</span> <a id="137c9" class="tk">SYSTIMER_FLAGS_TIMEOUT</a>         0x01</td></tr>
+<tr name="138" id="138">
+<td>138</td><td></td></tr>
+<tr name="139" id="139">
+<td>139</td><td><span class="kw">typedef</span> <span class="kw">struct</span> <span class="br">{</span></td></tr>
+<tr name="140" id="140">
+<td>140</td><td>  <a id="140c3" class="tk">uint8_t</a> <a id="140c11" class="tk">flags</a>;</td></tr>
+<tr name="141" id="141">
+<td>141</td><td>  <a id="141c3" class="tk">uint32_t</a> <a id="141c12" class="tk">tid</a>;                        <span class="ct">/* Tick count */</span></td></tr>
+<tr name="142" id="142">
+<td>142</td><td>  <a id="142c3" class="tk">uint32_t</a> <a id="142c12" class="tk">tick</a>;                       <span class="ct">/* Capture cuttent tick */</span></td></tr>
+<tr name="143" id="143">
+<td>143</td><td>  <a id="143c3" class="tk">uint32_t</a> <a id="143c12" class="tk">target_us</a>;                  <span class="ct">/* Target of systick */</span></td></tr>
+<tr name="144" id="144">
+<td>144</td><td><span class="br">}</span> <a id="144c3" class="tk">SYS_TIMER_uS_STRUCT</a>;</td></tr>
+<tr name="145" id="145">
+<td>145</td><td></td></tr>
+<tr name="146" id="146">
+<td>146</td><td><span class="kw">extern</span> <span class="kw">volatile</span> <span class="kw">unsigned</span> <span class="kw">int</span> <a id="146c30" class="tk">systick_count</a>;</td></tr>
+<tr name="147" id="147">
+<td>147</td><td><span class="kw">void</span> <a id="147c6" class="tk">SysTimer_Start</a>(<a id="147c21" class="tk">SYS_TIMER_STRUCT</a><a id="147c37" class="tk">*</a> <a id="147c39" class="tk">timer</a>, <a id="147c46" class="tk">uint32_t</a> <a id="147c55" class="tk">ms</a>);</td></tr>
+<tr name="148" id="148">
+<td>148</td><td><span class="kw">void</span> <a id="148c6" class="tk">SysTimer_uS_Start</a>(<a id="148c24" class="tk">SYS_TIMER_uS_STRUCT</a> <a id="148c44" class="tk">*</a><a id="148c45" class="tk">timer</a>, <a id="148c52" class="tk">uint32_t</a> <a id="148c61" class="tk">us</a>);</td></tr>
+<tr name="149" id="149">
+<td>149</td><td><span class="kw">int</span> <a id="149c5" class="tk">SysTimer_IsTimeout</a>(<a id="149c24" class="tk">SYS_TIMER_STRUCT</a><a id="149c40" class="tk">*</a> <a id="149c42" class="tk">timer</a>);</td></tr>
+<tr name="150" id="150">
+<td>150</td><td><span class="kw">int</span> <a id="150c5" class="tk">SysTimer_uS_IsTimeout</a>(<a id="150c27" class="tk">SYS_TIMER_uS_STRUCT</a><a id="150c46" class="tk">*</a> <a id="150c48" class="tk">timer</a>);</td></tr>
+<tr name="151" id="151">
+<td>151</td><td><span class="kw">void</span> <a id="151c6" class="tk">SysTimer_delay_us</a>(<a id="151c24" class="tk">uint32_t</a> <a id="151c33" class="tk">us</a>);</td></tr>
+<tr name="152" id="152">
+<td>152</td><td></td></tr>
+<tr name="153" id="153">
+<td>153</td><td><span class="ct">/* Profiler Defines */</span></td></tr>
+<tr name="154" id="154">
+<td>154</td><td><span class="pp">#define</span> <a id="154c9" class="tk">profilerGetSystickCounter</a>()    <a id="154c40" class="tk">SysTick</a>-&gt;<a id="154c49" class="tk">VAL</a></td></tr>
+<tr name="155" id="155">
+<td>155</td><td><span class="pp">#define</span> <a id="155c9" class="tk">profilerNumberOfCp</a>             0</td></tr>
+<tr name="156" id="156">
+<td>156</td><td><span class="pp">#define</span> <a id="156c9" class="tk">profilerAdditionalRecordLength</a> 1                         <span class="ct">/* Header only */</span></td></tr>
+<tr name="157" id="157">
+<td>157</td><td><span class="pp">#define</span> <a id="157c9" class="tk">profilerCRCSize</a>                1</td></tr>
+<tr name="158" id="158">
+<td>158</td><td><span class="pp">#define</span> <a id="158c9" class="tk">profilerPackageSize</a>            <a id="158c40" class="tk">profilerAdditionalRecordLength</a> <a id="158c71" class="tk">+</a> (2U<a id="158c76" class="tk">*</a><a id="158c77" class="tk">profilerNumberOfCp</a>) <a id="158c97" class="tk">+</a> <a id="158c99" class="tk">profilerCRCSize</a> <span class="ct">/* 2U* for loop_counter + systick_count */</span></td></tr>
+<tr name="159" id="159">
+<td>159</td><td><span class="pp">#define</span> <a id="159c9" class="tk">profilerHeader</a>                 0xFFFFFFF1</td></tr>
+<tr name="160" id="160">
+<td>160</td><td><span class="pp">#define</span> <a id="160c9" class="tk">profilerCRCLength</a>              <a id="160c40" class="tk">profilerPackageSize</a><a id="160c59" class="tk">-</a>1</td></tr>
+<tr name="161" id="161">
+<td>161</td><td></td></tr>
+<tr name="162" id="162">
+<td>162</td><td><span class="kw">extern</span> <span class="kw">volatile</span> <span class="kw">unsigned</span> <span class="kw">int</span> <a id="162c30" class="tk">systick_count</a>;</td></tr>
+<tr name="163" id="163">
+<td>163</td><td></td></tr>
+<tr name="164" id="164">
+<td>164</td><td><span class="ct">/* Profiler Declarations */</span></td></tr>
+<tr name="165" id="165">
+<td>165</td><td><span class="kw">extern</span> <a id="165c8" class="tk">uint32_t</a> <a id="165c17" class="tk">profiler_records</a>[<a id="165c34" class="tk">profilerPackageSize</a>];<span class="ct">/* header, overflow_count, data ..., CRC */</span></td></tr>
+<tr name="166" id="166">
+<td>166</td><td><span class="kw">extern</span> <a id="166c8" class="tk">uint32_t</a> <a id="166c17" class="tk">*</a><a id="166c18" class="tk">profiler_records_ptr</a>;</td></tr>
+<tr name="167" id="167">
+<td>167</td><td></td></tr>
+<tr name="168" id="168">
+<td>168</td><td><span class="ct">/* ########################################################################</span></td></tr>
+<tr name="169" id="169">
+<td>169</td><td><span class="ct"> * Name: &lt;Root&gt;/Regular ADC</span></td></tr>
+<tr name="170" id="170">
+<td>170</td><td><span class="ct"> * Id: RegularADC</span></td></tr>
+<tr name="171" id="171">
+<td>171</td><td><span class="ct"> * ########################################################################</span></td></tr>
+<tr name="172" id="172">
+<td>172</td><td><span class="ct"> */</span></td></tr>
+<tr name="173" id="173">
+<td>173</td><td><span class="kw">void</span> <a id="173c6" class="tk">enable_RegularADC</a>(<span class="kw">void</span>);</td></tr>
+<tr name="174" id="174">
+<td>174</td><td><span class="kw">void</span> <a id="174c6" class="tk">disable_RegularADC</a>(<span class="kw">void</span>);</td></tr>
+<tr name="175" id="175">
+<td>175</td><td><span class="kw">void</span> <a id="175c6" class="tk">RegularADCStartConversion</a>(<span class="kw">void</span>);</td></tr>
+<tr name="176" id="176">
+<td>176</td><td></td></tr>
+<tr name="177" id="177">
+<td>177</td><td><span class="ct">/* ########################################################################</span></td></tr>
+<tr name="178" id="178">
+<td>178</td><td><span class="ct"> * UART Utilities for packet processing</span></td></tr>
+<tr name="179" id="179">
+<td>179</td><td><span class="ct"> * ########################################################################</span></td></tr>
+<tr name="180" id="180">
+<td>180</td><td><span class="ct"> */</span></td></tr>
+<tr name="181" id="181">
+<td>181</td><td><span class="ct">/* UART packet process struct */</span></td></tr>
+<tr name="182" id="182">
+<td>182</td><td><span class="kw">typedef</span> <span class="kw">enum</span> <span class="br">{</span></td></tr>
+<tr name="183" id="183">
+<td>183</td><td>  <a id="183c3" class="tk">txIdle</a> = 0,</td></tr>
+<tr name="184" id="184">
+<td>184</td><td>  <a id="184c3" class="tk">txBusy</a></td></tr>
+<tr name="185" id="185">
+<td>185</td><td><span class="br">}</span> <a id="185c3" class="tk">UART_TX_STATE</a>;</td></tr>
+<tr name="186" id="186">
+<td>186</td><td></td></tr>
+<tr name="187" id="187">
+<td>187</td><td><span class="ct">/* Data read structure */</span></td></tr>
+<tr name="188" id="188">
+<td>188</td><td><span class="kw">typedef</span> <span class="kw">struct</span> <span class="br">{</span></td></tr>
+<tr name="189" id="189">
+<td>189</td><td>  <a id="189c3" class="tk">uint16_t</a> <a id="189c12" class="tk">index</a>;                      <span class="ct">/* Index of data in buffer */</span></td></tr>
+<tr name="190" id="190">
+<td>190</td><td>  <a id="190c3" class="tk">uint16_t</a> <a id="190c12" class="tk">count</a>;                      <span class="ct">/* Return data count */</span></td></tr>
+<tr name="191" id="191">
+<td>191</td><td>  <a id="191c3" class="tk">uint8_t</a> <a id="191c11" class="tk">*</a><a id="191c12" class="tk">buffer</a>;                     <span class="ct">/* Return buffer pointer of valid data */</span></td></tr>
+<tr name="192" id="192">
+<td>192</td><td><span class="br">}</span> <a id="192c3" class="tk">UARTRX_BUFFER_READ_STRUCT</a>;</td></tr>
+<tr name="193" id="193">
+<td>193</td><td></td></tr>
+<tr name="194" id="194">
+<td>194</td><td><span class="ct">/* ########################################################################</span></td></tr>
+<tr name="195" id="195">
+<td>195</td><td><span class="ct"> * Name: &lt;Root&gt;/UART Rx</span></td></tr>
+<tr name="196" id="196">
+<td>196</td><td><span class="ct"> * Id: UARTRx</span></td></tr>
+<tr name="197" id="197">
+<td>197</td><td><span class="ct"> * ########################################################################</span></td></tr>
+<tr name="198" id="198">
+<td>198</td><td><span class="ct"> */</span></td></tr>
+<tr name="199" id="199">
+<td>199</td><td><span class="kw">extern</span> <a id="199c8" class="tk">UARTRX_BUFFER_READ_STRUCT</a> <a id="199c34" class="tk">UARTRx_read_structure</a>;</td></tr>
+<tr name="200" id="200">
+<td>200</td><td><a id="200c1" class="tk">uint8_t</a> <a id="200c9" class="tk">UARTRx_Receive</a>(<a id="200c24" class="tk">uint8_t</a> <a id="200c32" class="tk">*</a><a id="200c33" class="tk">buffer</a>, <a id="200c41" class="tk">uint16_t</a> <a id="200c50" class="tk">size</a>);</td></tr>
+<tr name="201" id="201">
+<td>201</td><td><span class="kw">void</span> <a id="201c6" class="tk">enable_UARTRx</a>(<span class="kw">void</span>);</td></tr>
+<tr name="202" id="202">
+<td>202</td><td><span class="kw">void</span> <a id="202c6" class="tk">enable_BasicPWM</a>(<span class="kw">void</span>);            <span class="ct">/* BasicPWM */</span></td></tr>
+<tr name="203" id="203">
+<td>203</td><td></td></tr>
+<tr name="204" id="204">
+<td>204</td><td><span class="ct">/* ########################################################################</span></td></tr>
+<tr name="205" id="205">
+<td>205</td><td><span class="ct"> * Name: &lt;Root&gt;/UART Tx</span></td></tr>
+<tr name="206" id="206">
+<td>206</td><td><span class="ct"> * Id: UARTTx</span></td></tr>
+<tr name="207" id="207">
+<td>207</td><td><span class="ct"> * ########################################################################</span></td></tr>
+<tr name="208" id="208">
+<td>208</td><td><span class="ct"> */</span></td></tr>
+<tr name="209" id="209">
+<td>209</td><td><span class="kw">void</span> <a id="209c6" class="tk">enable_UARTTx</a>(<span class="kw">void</span>);</td></tr>
+<tr name="210" id="210">
+<td>210</td><td></td></tr>
+<tr name="211" id="211">
+<td>211</td><td><span class="ct">/* ########################################################################</span></td></tr>
+<tr name="212" id="212">
+<td>212</td><td><span class="ct"> * Name: &lt;Root&gt;/UART Setup</span></td></tr>
+<tr name="213" id="213">
+<td>213</td><td><span class="ct"> * Id: UARTSetup</span></td></tr>
+<tr name="214" id="214">
+<td>214</td><td><span class="ct"> * ########################################################################</span></td></tr>
+<tr name="215" id="215">
+<td>215</td><td><span class="ct"> */</span></td></tr>
+<tr name="216" id="216">
+<td>216</td><td><span class="pp">#define</span> <a id="216c9" class="tk">UTX2_BUFFER_SIZE</a>               512</td></tr>
+<tr name="217" id="217">
+<td>217</td><td></td></tr>
+<tr name="218" id="218">
+<td>218</td><td><span class="kw">extern</span> <a id="218c8" class="tk">uint8_t</a> <a id="218c16" class="tk">UART2_Tx_Buffer</a>[];</td></tr>
+<tr name="219" id="219">
+<td>219</td><td><span class="kw">extern</span> <a id="219c8" class="tk">UART_TX_STATE</a> <a id="219c22" class="tk">UARTSetup_Tx_State</a>;</td></tr>
+<tr name="220" id="220">
+<td>220</td><td><span class="kw">extern</span> <span class="kw">void</span> <a id="220c13" class="tk">UART2_TxUpdate</a>(<a id="220c28" class="tk">uint16_t</a> <a id="220c37" class="tk">count</a>);</td></tr>
+<tr name="221" id="221">
+<td>221</td><td></td></tr>
+<tr name="222" id="222">
+<td>222</td><td><span class="pp">#define</span> <a id="222c9" class="tk">URX2_BUFFER_SIZE</a>               512</td></tr>
+<tr name="223" id="223">
+<td>223</td><td></td></tr>
+<tr name="224" id="224">
+<td>224</td><td><span class="kw">extern</span> <a id="224c8" class="tk">uint8_t</a> <a id="224c16" class="tk">UART2_Rx_Buffer</a>[];</td></tr>
+<tr name="225" id="225">
+<td>225</td><td><span class="kw">extern</span> <a id="225c8" class="tk">uint8_t</a> <a id="225c16" class="tk">UART2_Temp_Buffer</a>[];</td></tr>
+<tr name="226" id="226">
+<td>226</td><td><a id="226c1" class="tk">uint16_t</a> <a id="226c10" class="tk">UART2_ReadLine</a>(<a id="226c25" class="tk">UARTRX_BUFFER_READ_STRUCT</a> <a id="226c51" class="tk">*</a><a id="226c52" class="tk">read_struct</a>, <span class="kw">const</span> <span class="kw">char</span></td></tr>
+<tr name="227" id="227">
+<td>227</td><td>  <a id="227c3" class="tk">*</a><a id="227c4" class="tk">terminator</a>, <a id="227c16" class="tk">uint16_t</a> <a id="227c25" class="tk">terminator_count</a>, <a id="227c43" class="tk">uint8_t</a> <a id="227c51" class="tk">*</a><a id="227c52" class="tk">buffer</a>, <a id="227c60" class="tk">uint16_t</a> <a id="227c69" class="tk">buffer_size</a>);</td></tr>
+<tr name="228" id="228">
+<td>228</td><td><a id="228c1" class="tk">uint8_t</a> <a id="228c9" class="tk">UART2_ReadBinary</a>(<a id="228c26" class="tk">UARTRX_BUFFER_READ_STRUCT</a> <a id="228c52" class="tk">*</a><a id="228c53" class="tk">read_struct</a>, <span class="kw">const</span> <span class="kw">char</span></td></tr>
+<tr name="229" id="229">
+<td>229</td><td>  <a id="229c3" class="tk">*</a><a id="229c4" class="tk">header</a>, <a id="229c12" class="tk">uint16_t</a> <a id="229c21" class="tk">header_count</a>, <span class="kw">const</span> <span class="kw">char</span> <a id="229c46" class="tk">*</a><a id="229c47" class="tk">terminator</a>, <a id="229c59" class="tk">uint16_t</a></td></tr>
+<tr name="230" id="230">
+<td>230</td><td>  <a id="230c3" class="tk">terminator_count</a>, <a id="230c21" class="tk">uint8_t</a> <a id="230c29" class="tk">*</a><a id="230c30" class="tk">buffer</a>, <a id="230c38" class="tk">uint16_t</a> <a id="230c47" class="tk">data_count</a>);</td></tr>
+<tr name="231" id="231">
+<td>231</td><td><span class="kw">void</span> <a id="231c6" class="tk">UART2_RestoreBytes</a>(<a id="231c25" class="tk">UARTRX_BUFFER_READ_STRUCT</a> <a id="231c51" class="tk">*</a><a id="231c52" class="tk">read_struct</a>, <a id="231c65" class="tk">uint16_t</a> <a id="231c74" class="tk">count</a>);</td></tr>
+<tr name="232" id="232">
+<td>232</td><td><span class="kw">extern</span> <a id="232c8" class="tk">uint16_t</a> <a id="232c17" class="tk">UART2_GetInitNDTR</a>(<span class="kw">void</span>);</td></tr>
+<tr name="233" id="233">
+<td>233</td><td><span class="kw">void</span> <a id="233c6" class="tk">UART2_Read</a>(<a id="233c17" class="tk">UARTRX_BUFFER_READ_STRUCT</a> <a id="233c43" class="tk">*</a><a id="233c44" class="tk">read_struct</a>);</td></tr>
+<tr name="234" id="234">
+<td>234</td><td><span class="kw">void</span> <a id="234c6" class="tk">UART2_ReadEx</a>(<a id="234c19" class="tk">UARTRX_BUFFER_READ_STRUCT</a> <a id="234c45" class="tk">*</a><a id="234c46" class="tk">read_struct</a>, <a id="234c59" class="tk">uint8_t</a> <a id="234c67" class="tk">*</a><a id="234c68" class="tk">buffer</a>,</td></tr>
+<tr name="235" id="235">
+<td>235</td><td>                  <a id="235c19" class="tk">uint16_t</a> <a id="235c28" class="tk">buffer_size</a>, <a id="235c41" class="tk">uint16_t</a><a id="235c49" class="tk">*</a><a id="235c50" class="tk">reading_count</a>);</td></tr>
+<tr name="236" id="236">
+<td>236</td><td><span class="kw">extern</span> <span class="kw">void</span> <a id="236c13" class="tk">UART2_Write</a>(<a id="236c25" class="tk">uint8_t</a><a id="236c32" class="tk">*</a> <a id="236c34" class="tk">data</a>, <a id="236c40" class="tk">uint16_t</a> <a id="236c49" class="tk">count</a>);</td></tr>
+<tr name="237" id="237">
+<td>237</td><td><span class="kw">extern</span> <a id="237c8" class="tk">UART_TX_STATE</a> <a id="237c22" class="tk">UART2_FlushTxBuffer</a>(<span class="kw">void</span>);</td></tr>
+<tr name="238" id="238">
+<td>238</td><td><span class="kw">void</span> <a id="238c6" class="tk">waijung_usart2_initial</a>(<span class="kw">void</span>);</td></tr>
+<tr name="239" id="239">
+<td>239</td><td></td></tr>
+<tr name="240" id="240">
+<td>240</td><td><span class="pp">#define</span> <a id="240c9" class="tk">WAIJUNG_USARt2_INIT</a>()          <a id="240c40" class="tk">waijung_usart2_initial</a>()</td></tr>
+<tr name="241" id="241">
+<td>241</td><td></td></tr>
+<tr name="242" id="242">
+<td>242</td><td><span class="kw">void</span> <a id="242c6" class="tk">enable_UARTSetup</a>(<span class="kw">void</span>);</td></tr>
+<tr name="243" id="243">
+<td>243</td><td></td></tr>
+<tr name="244" id="244">
+<td>244</td><td><span class="ct">/* Profiler initialization */</span></td></tr>
+<tr name="245" id="245">
+<td>245</td><td><span class="kw">void</span> <a id="245c6" class="tk">profiler_init</a>(<span class="kw">void</span>);</td></tr>
+<tr name="246" id="246">
+<td>246</td><td></td></tr>
+<tr name="247" id="247">
+<td>247</td><td><span class="ct">/* Profiler update */</span></td></tr>
+<tr name="248" id="248">
+<td>248</td><td><span class="kw">void</span> <a id="248c6" class="tk">profiler_update</a>(<span class="kw">void</span>);</td></tr>
+<tr name="249" id="249">
+<td>249</td><td></td></tr>
+<tr name="250" id="250">
+<td>250</td><td><span class="pp">#endif</span>                                 <span class="ct">/* RTW_HEADER_waijung_hwdrvlib_h_ */</span></td></tr>
+<tr name="251" id="251">
+<td>251</td><td></td></tr>
+<tr name="252" id="252">
+<td>252</td><td><span class="ct">/* [EOF] */</span></td></tr>
+<tr name="253" id="253">
+<td>253</td><td></td></tr>
+</table>
+</pre>
+</body>
+</html>

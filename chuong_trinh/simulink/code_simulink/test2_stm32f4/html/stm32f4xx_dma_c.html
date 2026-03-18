@@ -1,0 +1,2620 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="./js/coder_app.js"></script>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="./rtwreport_utils.js"></script>
+<script type="text/javascript" src="./rtwannotate.js"></script>
+<link rel="stylesheet" type="text/css" href="./css/coder_app.css"/>
+</head>
+<body onload="srcFileOnload();">
+<pre id="code">
+<table class="code" id="codeTbl">
+<tr name="1" id="1">
+<td>1</td><td><span class="ct">/**</span></td></tr>
+<tr name="2" id="2">
+<td>2</td><td><span class="ct">  ******************************************************************************</span></td></tr>
+<tr name="3" id="3">
+<td>3</td><td><span class="ct">  * @file    stm32f4xx_dma.c</span></td></tr>
+<tr name="4" id="4">
+<td>4</td><td><span class="ct">  * @author  MCD Application Team</span></td></tr>
+<tr name="5" id="5">
+<td>5</td><td><span class="ct">  * @version V1.8.0</span></td></tr>
+<tr name="6" id="6">
+<td>6</td><td><span class="ct">  * @date    04-November-2016</span></td></tr>
+<tr name="7" id="7">
+<td>7</td><td><span class="ct">  * @brief   This file provides firmware functions to manage the following </span></td></tr>
+<tr name="8" id="8">
+<td>8</td><td><span class="ct">  *          functionalities of the Direct Memory Access controller (DMA):           </span></td></tr>
+<tr name="9" id="9">
+<td>9</td><td><span class="ct">  *           + Initialization and Configuration</span></td></tr>
+<tr name="10" id="10">
+<td>10</td><td><span class="ct">  *           + Data Counter</span></td></tr>
+<tr name="11" id="11">
+<td>11</td><td><span class="ct">  *           + Double Buffer mode configuration and command  </span></td></tr>
+<tr name="12" id="12">
+<td>12</td><td><span class="ct">  *           + Interrupts and flags management</span></td></tr>
+<tr name="13" id="13">
+<td>13</td><td><span class="ct">  *           </span></td></tr>
+<tr name="14" id="14">
+<td>14</td><td><span class="ct">  @verbatim      </span></td></tr>
+<tr name="15" id="15">
+<td>15</td><td><span class="ct"> ===============================================================================      </span></td></tr>
+<tr name="16" id="16">
+<td>16</td><td><span class="ct">                       ##### How to use this driver #####</span></td></tr>
+<tr name="17" id="17">
+<td>17</td><td><span class="ct"> ===============================================================================</span></td></tr>
+<tr name="18" id="18">
+<td>18</td><td><span class="ct">    [..] </span></td></tr>
+<tr name="19" id="19">
+<td>19</td><td><span class="ct">      (#) Enable The DMA controller clock using RCC_AHB1PeriphResetCmd(RCC_AHB1Periph_DMA1, ENABLE)</span></td></tr>
+<tr name="20" id="20">
+<td>20</td><td><span class="ct">          function for DMA1 or using RCC_AHB1PeriphResetCmd(RCC_AHB1Periph_DMA2, ENABLE)</span></td></tr>
+<tr name="21" id="21">
+<td>21</td><td><span class="ct">          function for DMA2.</span></td></tr>
+<tr name="22" id="22">
+<td>22</td><td><span class="ct">  </span></td></tr>
+<tr name="23" id="23">
+<td>23</td><td><span class="ct">      (#) Enable and configure the peripheral to be connected to the DMA Stream</span></td></tr>
+<tr name="24" id="24">
+<td>24</td><td><span class="ct">          (except for internal SRAM / FLASH memories: no initialization is </span></td></tr>
+<tr name="25" id="25">
+<td>25</td><td><span class="ct">          necessary). </span></td></tr>
+<tr name="26" id="26">
+<td>26</td><td><span class="ct">          </span></td></tr>
+<tr name="27" id="27">
+<td>27</td><td><span class="ct">      (#) For a given Stream, program the required configuration through following parameters:   </span></td></tr>
+<tr name="28" id="28">
+<td>28</td><td><span class="ct">          Source and Destination addresses, Transfer Direction, Transfer size, Source and Destination </span></td></tr>
+<tr name="29" id="29">
+<td>29</td><td><span class="ct">          data formats, Circular or Normal mode, Stream Priority level, Source and Destination </span></td></tr>
+<tr name="30" id="30">
+<td>30</td><td><span class="ct">          Incrementation mode, FIFO mode and its Threshold (if needed), Burst </span></td></tr>
+<tr name="31" id="31">
+<td>31</td><td><span class="ct">          mode for Source and/or Destination (if needed) using the DMA_Init() function.</span></td></tr>
+<tr name="32" id="32">
+<td>32</td><td><span class="ct">          To avoid filling unnecessary fields, you can call DMA_StructInit() function</span></td></tr>
+<tr name="33" id="33">
+<td>33</td><td><span class="ct">          to initialize a given structure with default values (reset values), the modify</span></td></tr>
+<tr name="34" id="34">
+<td>34</td><td><span class="ct">          only necessary fields </span></td></tr>
+<tr name="35" id="35">
+<td>35</td><td><span class="ct">          (ie. Source and Destination addresses, Transfer size and Data Formats).</span></td></tr>
+<tr name="36" id="36">
+<td>36</td><td><span class="ct">  </span></td></tr>
+<tr name="37" id="37">
+<td>37</td><td><span class="ct">      (#) Enable the NVIC and the corresponding interrupt(s) using the function </span></td></tr>
+<tr name="38" id="38">
+<td>38</td><td><span class="ct">          DMA_ITConfig() if you need to use DMA interrupts. </span></td></tr>
+<tr name="39" id="39">
+<td>39</td><td><span class="ct">  </span></td></tr>
+<tr name="40" id="40">
+<td>40</td><td><span class="ct">      (#) Optionally, if the Circular mode is enabled, you can use the Double buffer mode by configuring </span></td></tr>
+<tr name="41" id="41">
+<td>41</td><td><span class="ct">          the second Memory address and the first Memory to be used through the function </span></td></tr>
+<tr name="42" id="42">
+<td>42</td><td><span class="ct">          DMA_DoubleBufferModeConfig(). Then enable the Double buffer mode through the function</span></td></tr>
+<tr name="43" id="43">
+<td>43</td><td><span class="ct">          DMA_DoubleBufferModeCmd(). These operations must be done before step 6.</span></td></tr>
+<tr name="44" id="44">
+<td>44</td><td><span class="ct">      </span></td></tr>
+<tr name="45" id="45">
+<td>45</td><td><span class="ct">      (#) Enable the DMA stream using the DMA_Cmd() function. </span></td></tr>
+<tr name="46" id="46">
+<td>46</td><td><span class="ct">                  </span></td></tr>
+<tr name="47" id="47">
+<td>47</td><td><span class="ct">      (#) Activate the needed Stream Request using PPP_DMACmd() function for</span></td></tr>
+<tr name="48" id="48">
+<td>48</td><td><span class="ct">          any PPP peripheral except internal SRAM and FLASH (ie. SPI, USART ...)</span></td></tr>
+<tr name="49" id="49">
+<td>49</td><td><span class="ct">          The function allowing this operation is provided in each PPP peripheral</span></td></tr>
+<tr name="50" id="50">
+<td>50</td><td><span class="ct">          driver (ie. SPI_DMACmd for SPI peripheral).</span></td></tr>
+<tr name="51" id="51">
+<td>51</td><td><span class="ct">          Once the Stream is enabled, it is not possible to modify its configuration</span></td></tr>
+<tr name="52" id="52">
+<td>52</td><td><span class="ct">          unless the stream is stopped and disabled.</span></td></tr>
+<tr name="53" id="53">
+<td>53</td><td><span class="ct">          After enabling the Stream, it is advised to monitor the EN bit status using</span></td></tr>
+<tr name="54" id="54">
+<td>54</td><td><span class="ct">          the function DMA_GetCmdStatus(). In case of configuration errors or bus errors</span></td></tr>
+<tr name="55" id="55">
+<td>55</td><td><span class="ct">          this bit will remain reset and all transfers on this Stream will remain on hold.      </span></td></tr>
+<tr name="56" id="56">
+<td>56</td><td><span class="ct">  </span></td></tr>
+<tr name="57" id="57">
+<td>57</td><td><span class="ct">      (#) Optionally, you can configure the number of data to be transferred</span></td></tr>
+<tr name="58" id="58">
+<td>58</td><td><span class="ct">          when the Stream is disabled (ie. after each Transfer Complete event</span></td></tr>
+<tr name="59" id="59">
+<td>59</td><td><span class="ct">          or when a Transfer Error occurs) using the function DMA_SetCurrDataCounter().</span></td></tr>
+<tr name="60" id="60">
+<td>60</td><td><span class="ct">          And you can get the number of remaining data to be transferred using </span></td></tr>
+<tr name="61" id="61">
+<td>61</td><td><span class="ct">          the function DMA_GetCurrDataCounter() at run time (when the DMA Stream is</span></td></tr>
+<tr name="62" id="62">
+<td>62</td><td><span class="ct">          enabled and running).  </span></td></tr>
+<tr name="63" id="63">
+<td>63</td><td><span class="ct">                     </span></td></tr>
+<tr name="64" id="64">
+<td>64</td><td><span class="ct">      (#) To control DMA events you can use one of the following two methods:</span></td></tr>
+<tr name="65" id="65">
+<td>65</td><td><span class="ct">        (##) Check on DMA Stream flags using the function DMA_GetFlagStatus().  </span></td></tr>
+<tr name="66" id="66">
+<td>66</td><td><span class="ct">        (##) Use DMA interrupts through the function DMA_ITConfig() at initialization</span></td></tr>
+<tr name="67" id="67">
+<td>67</td><td><span class="ct">             phase and DMA_GetITStatus() function into interrupt routines in</span></td></tr>
+<tr name="68" id="68">
+<td>68</td><td><span class="ct">             communication phase.</span></td></tr>
+<tr name="69" id="69">
+<td>69</td><td><span class="ct">    [..]     </span></td></tr>
+<tr name="70" id="70">
+<td>70</td><td><span class="ct">          After checking on a flag you should clear it using DMA_ClearFlag()</span></td></tr>
+<tr name="71" id="71">
+<td>71</td><td><span class="ct">          function. And after checking on an interrupt event you should </span></td></tr>
+<tr name="72" id="72">
+<td>72</td><td><span class="ct">          clear it using DMA_ClearITPendingBit() function.    </span></td></tr>
+<tr name="73" id="73">
+<td>73</td><td><span class="ct">                </span></td></tr>
+<tr name="74" id="74">
+<td>74</td><td><span class="ct">      (#) Optionally, if Circular mode and Double Buffer mode are enabled, you can modify</span></td></tr>
+<tr name="75" id="75">
+<td>75</td><td><span class="ct">          the Memory Addresses using the function DMA_MemoryTargetConfig(). Make sure that</span></td></tr>
+<tr name="76" id="76">
+<td>76</td><td><span class="ct">          the Memory Address to be modified is not the one currently in use by DMA Stream.</span></td></tr>
+<tr name="77" id="77">
+<td>77</td><td><span class="ct">          This condition can be monitored using the function DMA_GetCurrentMemoryTarget().</span></td></tr>
+<tr name="78" id="78">
+<td>78</td><td><span class="ct">                </span></td></tr>
+<tr name="79" id="79">
+<td>79</td><td><span class="ct">      (#) Optionally, Pause-Resume operations may be performed:</span></td></tr>
+<tr name="80" id="80">
+<td>80</td><td><span class="ct">          The DMA_Cmd() function may be used to perform Pause-Resume operation. </span></td></tr>
+<tr name="81" id="81">
+<td>81</td><td><span class="ct">          When a transfer is ongoing, calling this function to disable the </span></td></tr>
+<tr name="82" id="82">
+<td>82</td><td><span class="ct">          Stream will cause the transfer to be paused. All configuration registers </span></td></tr>
+<tr name="83" id="83">
+<td>83</td><td><span class="ct">          and the number of remaining data will be preserved. When calling again </span></td></tr>
+<tr name="84" id="84">
+<td>84</td><td><span class="ct">          this function to re-enable the Stream, the transfer will be resumed from </span></td></tr>
+<tr name="85" id="85">
+<td>85</td><td><span class="ct">          the point where it was paused.          </span></td></tr>
+<tr name="86" id="86">
+<td>86</td><td><span class="ct">                   </span></td></tr>
+<tr name="87" id="87">
+<td>87</td><td><span class="ct">      -@- Memory-to-Memory transfer is possible by setting the address of the memory into</span></td></tr>
+<tr name="88" id="88">
+<td>88</td><td><span class="ct">           the Peripheral registers. In this mode, Circular mode and Double Buffer mode</span></td></tr>
+<tr name="89" id="89">
+<td>89</td><td><span class="ct">           are not allowed.</span></td></tr>
+<tr name="90" id="90">
+<td>90</td><td><span class="ct">    </span></td></tr>
+<tr name="91" id="91">
+<td>91</td><td><span class="ct">      -@- The FIFO is used mainly to reduce bus usage and to allow data </span></td></tr>
+<tr name="92" id="92">
+<td>92</td><td><span class="ct">           packing/unpacking: it is possible to set different Data Sizes for </span></td></tr>
+<tr name="93" id="93">
+<td>93</td><td><span class="ct">           the Peripheral and the Memory (ie. you can set Half-Word data size </span></td></tr>
+<tr name="94" id="94">
+<td>94</td><td><span class="ct">           for the peripheral to access its data register and set Word data size</span></td></tr>
+<tr name="95" id="95">
+<td>95</td><td><span class="ct">           for the Memory to gain in access time. Each two Half-words will be </span></td></tr>
+<tr name="96" id="96">
+<td>96</td><td><span class="ct">           packed and written in a single access to a Word in the Memory).</span></td></tr>
+<tr name="97" id="97">
+<td>97</td><td><span class="ct">      </span></td></tr>
+<tr name="98" id="98">
+<td>98</td><td><span class="ct">      -@- When FIFO is disabled, it is not allowed to configure different </span></td></tr>
+<tr name="99" id="99">
+<td>99</td><td><span class="ct">           Data Sizes for Source and Destination. In this case the Peripheral </span></td></tr>
+<tr name="100" id="100">
+<td>100</td><td><span class="ct">           Data Size will be applied to both Source and Destination.               </span></td></tr>
+<tr name="101" id="101">
+<td>101</td><td><span class="ct">  </span></td></tr>
+<tr name="102" id="102">
+<td>102</td><td><span class="ct">  @endverbatim</span></td></tr>
+<tr name="103" id="103">
+<td>103</td><td><span class="ct">  ******************************************************************************</span></td></tr>
+<tr name="104" id="104">
+<td>104</td><td><span class="ct">  * @attention</span></td></tr>
+<tr name="105" id="105">
+<td>105</td><td><span class="ct">  *</span></td></tr>
+<tr name="106" id="106">
+<td>106</td><td><span class="ct">  * &lt;h2&gt;&lt;center&gt;&amp;copy; COPYRIGHT 2016 STMicroelectronics&lt;/center&gt;&lt;/h2&gt;</span></td></tr>
+<tr name="107" id="107">
+<td>107</td><td><span class="ct">  *</span></td></tr>
+<tr name="108" id="108">
+<td>108</td><td><span class="ct">  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");</span></td></tr>
+<tr name="109" id="109">
+<td>109</td><td><span class="ct">  * You may not use this file except in compliance with the License.</span></td></tr>
+<tr name="110" id="110">
+<td>110</td><td><span class="ct">  * You may obtain a copy of the License at:</span></td></tr>
+<tr name="111" id="111">
+<td>111</td><td><span class="ct">  *</span></td></tr>
+<tr name="112" id="112">
+<td>112</td><td><span class="ct">  *        http://www.st.com/software_license_agreement_liberty_v2</span></td></tr>
+<tr name="113" id="113">
+<td>113</td><td><span class="ct">  *</span></td></tr>
+<tr name="114" id="114">
+<td>114</td><td><span class="ct">  * Unless required by applicable law or agreed to in writing, software </span></td></tr>
+<tr name="115" id="115">
+<td>115</td><td><span class="ct">  * distributed under the License is distributed on an "AS IS" BASIS, </span></td></tr>
+<tr name="116" id="116">
+<td>116</td><td><span class="ct">  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></td></tr>
+<tr name="117" id="117">
+<td>117</td><td><span class="ct">  * See the License for the specific language governing permissions and</span></td></tr>
+<tr name="118" id="118">
+<td>118</td><td><span class="ct">  * limitations under the License.</span></td></tr>
+<tr name="119" id="119">
+<td>119</td><td><span class="ct">  *</span></td></tr>
+<tr name="120" id="120">
+<td>120</td><td><span class="ct">  ******************************************************************************  </span></td></tr>
+<tr name="121" id="121">
+<td>121</td><td><span class="ct">  */</span> </td></tr>
+<tr name="122" id="122">
+<td>122</td><td></td></tr>
+<tr name="123" id="123">
+<td>123</td><td><span class="ct">/* Includes ------------------------------------------------------------------*/</span></td></tr>
+<tr name="124" id="124">
+<td>124</td><td><span class="pp">#include "stm32f4xx_dma.h"</span></td></tr>
+<tr name="125" id="125">
+<td>125</td><td><span class="pp">#include "stm32f4xx_rcc.h"</span></td></tr>
+<tr name="126" id="126">
+<td>126</td><td></td></tr>
+<tr name="127" id="127">
+<td>127</td><td><span class="ct">/** @addtogroup STM32F4xx_StdPeriph_Driver</span></td></tr>
+<tr name="128" id="128">
+<td>128</td><td><span class="ct">  * @{</span></td></tr>
+<tr name="129" id="129">
+<td>129</td><td><span class="ct">  */</span></td></tr>
+<tr name="130" id="130">
+<td>130</td><td></td></tr>
+<tr name="131" id="131">
+<td>131</td><td><span class="ct">/** @defgroup DMA </span></td></tr>
+<tr name="132" id="132">
+<td>132</td><td><span class="ct">  * @brief DMA driver modules</span></td></tr>
+<tr name="133" id="133">
+<td>133</td><td><span class="ct">  * @{</span></td></tr>
+<tr name="134" id="134">
+<td>134</td><td><span class="ct">  */</span> </td></tr>
+<tr name="135" id="135">
+<td>135</td><td></td></tr>
+<tr name="136" id="136">
+<td>136</td><td><span class="ct">/* Private typedef -----------------------------------------------------------*/</span></td></tr>
+<tr name="137" id="137">
+<td>137</td><td><span class="ct">/* Private define ------------------------------------------------------------*/</span></td></tr>
+<tr name="138" id="138">
+<td>138</td><td></td></tr>
+<tr name="139" id="139">
+<td>139</td><td><span class="ct">/* Masks Definition */</span></td></tr>
+<tr name="140" id="140">
+<td>140</td><td><span class="pp">#define</span> <a id="140c9" class="tk">TRANSFER_IT_ENABLE_MASK</a> (<a id="140c34" class="tk">uint32_t</a>)(<a id="140c44" class="tk">DMA_SxCR_TCIE</a> <a id="140c58" class="tk">|</a> <a id="140c60" class="tk">DMA_SxCR_HTIE</a> <a id="140c74" class="tk">|</a> \</td></tr>
+<tr name="141" id="141">
+<td>141</td><td>                                           <a id="141c119" class="tk">DMA_SxCR_TEIE</a> <a id="141c133" class="tk">|</a> <a id="141c135" class="tk">DMA_SxCR_DMEIE</a>)</td></tr>
+<tr name="142" id="142">
+<td>142</td><td></td></tr>
+<tr name="143" id="143">
+<td>143</td><td><span class="pp">#define</span> <a id="143c9" class="tk">DMA_Stream0_IT_MASK</a>     (<a id="143c34" class="tk">uint32_t</a>)(<a id="143c44" class="tk">DMA_LISR_FEIF0</a> <a id="143c59" class="tk">|</a> <a id="143c61" class="tk">DMA_LISR_DMEIF0</a> <a id="143c77" class="tk">|</a> \</td></tr>
+<tr name="144" id="144">
+<td>144</td><td>                                           <a id="144c122" class="tk">DMA_LISR_TEIF0</a> <a id="144c137" class="tk">|</a> <a id="144c139" class="tk">DMA_LISR_HTIF0</a> <a id="144c154" class="tk">|</a> \</td></tr>
+<tr name="145" id="145">
+<td>145</td><td>                                           <a id="145c199" class="tk">DMA_LISR_TCIF0</a>)</td></tr>
+<tr name="146" id="146">
+<td>146</td><td></td></tr>
+<tr name="147" id="147">
+<td>147</td><td><span class="pp">#define</span> <a id="147c9" class="tk">DMA_Stream1_IT_MASK</a>     (<a id="147c34" class="tk">uint32_t</a>)(<a id="147c44" class="tk">DMA_Stream0_IT_MASK</a> <a id="147c64" class="tk">&lt;&lt;</a> 6)</td></tr>
+<tr name="148" id="148">
+<td>148</td><td><span class="pp">#define</span> <a id="148c9" class="tk">DMA_Stream2_IT_MASK</a>     (<a id="148c34" class="tk">uint32_t</a>)(<a id="148c44" class="tk">DMA_Stream0_IT_MASK</a> <a id="148c64" class="tk">&lt;&lt;</a> 16)</td></tr>
+<tr name="149" id="149">
+<td>149</td><td><span class="pp">#define</span> <a id="149c9" class="tk">DMA_Stream3_IT_MASK</a>     (<a id="149c34" class="tk">uint32_t</a>)(<a id="149c44" class="tk">DMA_Stream0_IT_MASK</a> <a id="149c64" class="tk">&lt;&lt;</a> 22)</td></tr>
+<tr name="150" id="150">
+<td>150</td><td><span class="pp">#define</span> <a id="150c9" class="tk">DMA_Stream4_IT_MASK</a>     (<a id="150c34" class="tk">uint32_t</a>)(<a id="150c44" class="tk">DMA_Stream0_IT_MASK</a> <a id="150c64" class="tk">|</a> (<a id="150c67" class="tk">uint32_t</a>)0x20000000)</td></tr>
+<tr name="151" id="151">
+<td>151</td><td><span class="pp">#define</span> <a id="151c9" class="tk">DMA_Stream5_IT_MASK</a>     (<a id="151c34" class="tk">uint32_t</a>)(<a id="151c44" class="tk">DMA_Stream1_IT_MASK</a> <a id="151c64" class="tk">|</a> (<a id="151c67" class="tk">uint32_t</a>)0x20000000)</td></tr>
+<tr name="152" id="152">
+<td>152</td><td><span class="pp">#define</span> <a id="152c9" class="tk">DMA_Stream6_IT_MASK</a>     (<a id="152c34" class="tk">uint32_t</a>)(<a id="152c44" class="tk">DMA_Stream2_IT_MASK</a> <a id="152c64" class="tk">|</a> (<a id="152c67" class="tk">uint32_t</a>)0x20000000)</td></tr>
+<tr name="153" id="153">
+<td>153</td><td><span class="pp">#define</span> <a id="153c9" class="tk">DMA_Stream7_IT_MASK</a>     (<a id="153c34" class="tk">uint32_t</a>)(<a id="153c44" class="tk">DMA_Stream3_IT_MASK</a> <a id="153c64" class="tk">|</a> (<a id="153c67" class="tk">uint32_t</a>)0x20000000)</td></tr>
+<tr name="154" id="154">
+<td>154</td><td><span class="pp">#define</span> <a id="154c9" class="tk">TRANSFER_IT_MASK</a>        (<a id="154c34" class="tk">uint32_t</a>)0x0F3C0F3C</td></tr>
+<tr name="155" id="155">
+<td>155</td><td><span class="pp">#define</span> <a id="155c9" class="tk">HIGH_ISR_MASK</a>           (<a id="155c34" class="tk">uint32_t</a>)0x20000000</td></tr>
+<tr name="156" id="156">
+<td>156</td><td><span class="pp">#define</span> <a id="156c9" class="tk">RESERVED_MASK</a>           (<a id="156c34" class="tk">uint32_t</a>)0x0F7D0F7D  </td></tr>
+<tr name="157" id="157">
+<td>157</td><td></td></tr>
+<tr name="158" id="158">
+<td>158</td><td><span class="ct">/* Private macro -------------------------------------------------------------*/</span></td></tr>
+<tr name="159" id="159">
+<td>159</td><td><span class="ct">/* Private variables ---------------------------------------------------------*/</span></td></tr>
+<tr name="160" id="160">
+<td>160</td><td><span class="ct">/* Private function prototypes -----------------------------------------------*/</span></td></tr>
+<tr name="161" id="161">
+<td>161</td><td><span class="ct">/* Private functions ---------------------------------------------------------*/</span></td></tr>
+<tr name="162" id="162">
+<td>162</td><td></td></tr>
+<tr name="163" id="163">
+<td>163</td><td></td></tr>
+<tr name="164" id="164">
+<td>164</td><td><span class="ct">/** @defgroup DMA_Private_Functions</span></td></tr>
+<tr name="165" id="165">
+<td>165</td><td><span class="ct">  * @{</span></td></tr>
+<tr name="166" id="166">
+<td>166</td><td><span class="ct">  */</span></td></tr>
+<tr name="167" id="167">
+<td>167</td><td></td></tr>
+<tr name="168" id="168">
+<td>168</td><td><span class="ct">/** @defgroup DMA_Group1 Initialization and Configuration functions</span></td></tr>
+<tr name="169" id="169">
+<td>169</td><td><span class="ct"> *  @brief   Initialization and Configuration functions</span></td></tr>
+<tr name="170" id="170">
+<td>170</td><td><span class="ct"> *</span></td></tr>
+<tr name="171" id="171">
+<td>171</td><td><span class="ct">@verbatim   </span></td></tr>
+<tr name="172" id="172">
+<td>172</td><td><span class="ct"> ===============================================================================</span></td></tr>
+<tr name="173" id="173">
+<td>173</td><td><span class="ct">                ##### Initialization and Configuration functions #####</span></td></tr>
+<tr name="174" id="174">
+<td>174</td><td><span class="ct"> ===============================================================================  </span></td></tr>
+<tr name="175" id="175">
+<td>175</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="176" id="176">
+<td>176</td><td><span class="ct">    This subsection provides functions allowing to initialize the DMA Stream source</span></td></tr>
+<tr name="177" id="177">
+<td>177</td><td><span class="ct">    and destination addresses, incrementation and data sizes, transfer direction, </span></td></tr>
+<tr name="178" id="178">
+<td>178</td><td><span class="ct">    buffer size, circular/normal mode selection, memory-to-memory mode selection </span></td></tr>
+<tr name="179" id="179">
+<td>179</td><td><span class="ct">    and Stream priority value.</span></td></tr>
+<tr name="180" id="180">
+<td>180</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="181" id="181">
+<td>181</td><td><span class="ct">    The DMA_Init() function follows the DMA configuration procedures as described in</span></td></tr>
+<tr name="182" id="182">
+<td>182</td><td><span class="ct">    reference manual (RM0090) except the first point: waiting on EN bit to be reset.</span></td></tr>
+<tr name="183" id="183">
+<td>183</td><td><span class="ct">    This condition should be checked by user application using the function DMA_GetCmdStatus()</span></td></tr>
+<tr name="184" id="184">
+<td>184</td><td><span class="ct">    before calling the DMA_Init() function.</span></td></tr>
+<tr name="185" id="185">
+<td>185</td><td><span class="ct"></span></td></tr>
+<tr name="186" id="186">
+<td>186</td><td><span class="ct">@endverbatim</span></td></tr>
+<tr name="187" id="187">
+<td>187</td><td><span class="ct">  * @{</span></td></tr>
+<tr name="188" id="188">
+<td>188</td><td><span class="ct">  */</span></td></tr>
+<tr name="189" id="189">
+<td>189</td><td></td></tr>
+<tr name="190" id="190">
+<td>190</td><td><span class="ct">/**</span></td></tr>
+<tr name="191" id="191">
+<td>191</td><td><span class="ct">  * @brief  Deinitialize the DMAy Streamx registers to their default reset values.</span></td></tr>
+<tr name="192" id="192">
+<td>192</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="193" id="193">
+<td>193</td><td><span class="ct">  *         to 7 to select the DMA Stream.</span></td></tr>
+<tr name="194" id="194">
+<td>194</td><td><span class="ct">  * @retval None</span></td></tr>
+<tr name="195" id="195">
+<td>195</td><td><span class="ct">  */</span></td></tr>
+<tr name="196" id="196">
+<td>196</td><td><span class="kw">void</span> <a id="196c6" class="tk">DMA_DeInit</a>(<a id="196c17" class="tk">DMA_Stream_TypeDef</a><a id="196c35" class="tk">*</a> <a id="196c37" class="tk">DMAy_Streamx</a>)</td></tr>
+<tr name="197" id="197">
+<td>197</td><td><span class="br">{</span></td></tr>
+<tr name="198" id="198">
+<td>198</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="199" id="199">
+<td>199</td><td>  <a id="199c3" class="tk">assert_param</a>(<a id="199c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="199c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="200" id="200">
+<td>200</td><td></td></tr>
+<tr name="201" id="201">
+<td>201</td><td>  <span class="ct">/* Disable the selected DMAy Streamx */</span></td></tr>
+<tr name="202" id="202">
+<td>202</td><td>  <a id="202c3" class="tk">DMAy_Streamx</a>-&gt;<a id="202c17" class="tk">CR</a> <a id="202c20" class="tk">&amp;=</a> <a id="202c23" class="tk">~</a>((<a id="202c26" class="tk">uint32_t</a>)<a id="202c35" class="tk">DMA_SxCR_EN</a>);</td></tr>
+<tr name="203" id="203">
+<td>203</td><td></td></tr>
+<tr name="204" id="204">
+<td>204</td><td>  <span class="ct">/* Reset DMAy Streamx control register */</span></td></tr>
+<tr name="205" id="205">
+<td>205</td><td>  <a id="205c3" class="tk">DMAy_Streamx</a>-&gt;<a id="205c17" class="tk">CR</a>  = 0;</td></tr>
+<tr name="206" id="206">
+<td>206</td><td>  </td></tr>
+<tr name="207" id="207">
+<td>207</td><td>  <span class="ct">/* Reset DMAy Streamx Number of Data to Transfer register */</span></td></tr>
+<tr name="208" id="208">
+<td>208</td><td>  <a id="208c3" class="tk">DMAy_Streamx</a>-&gt;<a id="208c17" class="tk">NDTR</a> = 0;</td></tr>
+<tr name="209" id="209">
+<td>209</td><td>  </td></tr>
+<tr name="210" id="210">
+<td>210</td><td>  <span class="ct">/* Reset DMAy Streamx peripheral address register */</span></td></tr>
+<tr name="211" id="211">
+<td>211</td><td>  <a id="211c3" class="tk">DMAy_Streamx</a>-&gt;<a id="211c17" class="tk">PAR</a>  = 0;</td></tr>
+<tr name="212" id="212">
+<td>212</td><td>  </td></tr>
+<tr name="213" id="213">
+<td>213</td><td>  <span class="ct">/* Reset DMAy Streamx memory 0 address register */</span></td></tr>
+<tr name="214" id="214">
+<td>214</td><td>  <a id="214c3" class="tk">DMAy_Streamx</a>-&gt;<a id="214c17" class="tk">M0AR</a> = 0;</td></tr>
+<tr name="215" id="215">
+<td>215</td><td></td></tr>
+<tr name="216" id="216">
+<td>216</td><td>  <span class="ct">/* Reset DMAy Streamx memory 1 address register */</span></td></tr>
+<tr name="217" id="217">
+<td>217</td><td>  <a id="217c3" class="tk">DMAy_Streamx</a>-&gt;<a id="217c17" class="tk">M1AR</a> = 0;</td></tr>
+<tr name="218" id="218">
+<td>218</td><td></td></tr>
+<tr name="219" id="219">
+<td>219</td><td>  <span class="ct">/* Reset DMAy Streamx FIFO control register */</span></td></tr>
+<tr name="220" id="220">
+<td>220</td><td>  <a id="220c3" class="tk">DMAy_Streamx</a>-&gt;<a id="220c17" class="tk">FCR</a> = (<a id="220c24" class="tk">uint32_t</a>)0x00000021; </td></tr>
+<tr name="221" id="221">
+<td>221</td><td></td></tr>
+<tr name="222" id="222">
+<td>222</td><td>  <span class="ct">/* Reset interrupt pending bits for the selected stream */</span></td></tr>
+<tr name="223" id="223">
+<td>223</td><td>  <span class="kw">if</span> (<a id="223c7" class="tk">DMAy_Streamx</a> <a id="223c20" class="tk">==</a> <a id="223c23" class="tk">DMA1_Stream0</a>)</td></tr>
+<tr name="224" id="224">
+<td>224</td><td>  <span class="br">{</span></td></tr>
+<tr name="225" id="225">
+<td>225</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA1 Stream0 */</span></td></tr>
+<tr name="226" id="226">
+<td>226</td><td>    <a id="226c5" class="tk">DMA1</a>-&gt;<a id="226c11" class="tk">LIFCR</a> = <a id="226c19" class="tk">DMA_Stream0_IT_MASK</a>;</td></tr>
+<tr name="227" id="227">
+<td>227</td><td>  <span class="br">}</span></td></tr>
+<tr name="228" id="228">
+<td>228</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="228c12" class="tk">DMAy_Streamx</a> <a id="228c25" class="tk">==</a> <a id="228c28" class="tk">DMA1_Stream1</a>)</td></tr>
+<tr name="229" id="229">
+<td>229</td><td>  <span class="br">{</span></td></tr>
+<tr name="230" id="230">
+<td>230</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA1 Stream1 */</span></td></tr>
+<tr name="231" id="231">
+<td>231</td><td>    <a id="231c5" class="tk">DMA1</a>-&gt;<a id="231c11" class="tk">LIFCR</a> = <a id="231c19" class="tk">DMA_Stream1_IT_MASK</a>;</td></tr>
+<tr name="232" id="232">
+<td>232</td><td>  <span class="br">}</span></td></tr>
+<tr name="233" id="233">
+<td>233</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="233c12" class="tk">DMAy_Streamx</a> <a id="233c25" class="tk">==</a> <a id="233c28" class="tk">DMA1_Stream2</a>)</td></tr>
+<tr name="234" id="234">
+<td>234</td><td>  <span class="br">{</span></td></tr>
+<tr name="235" id="235">
+<td>235</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA1 Stream2 */</span></td></tr>
+<tr name="236" id="236">
+<td>236</td><td>    <a id="236c5" class="tk">DMA1</a>-&gt;<a id="236c11" class="tk">LIFCR</a> = <a id="236c19" class="tk">DMA_Stream2_IT_MASK</a>;</td></tr>
+<tr name="237" id="237">
+<td>237</td><td>  <span class="br">}</span></td></tr>
+<tr name="238" id="238">
+<td>238</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="238c12" class="tk">DMAy_Streamx</a> <a id="238c25" class="tk">==</a> <a id="238c28" class="tk">DMA1_Stream3</a>)</td></tr>
+<tr name="239" id="239">
+<td>239</td><td>  <span class="br">{</span></td></tr>
+<tr name="240" id="240">
+<td>240</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA1 Stream3 */</span></td></tr>
+<tr name="241" id="241">
+<td>241</td><td>    <a id="241c5" class="tk">DMA1</a>-&gt;<a id="241c11" class="tk">LIFCR</a> = <a id="241c19" class="tk">DMA_Stream3_IT_MASK</a>;</td></tr>
+<tr name="242" id="242">
+<td>242</td><td>  <span class="br">}</span></td></tr>
+<tr name="243" id="243">
+<td>243</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="243c12" class="tk">DMAy_Streamx</a> <a id="243c25" class="tk">==</a> <a id="243c28" class="tk">DMA1_Stream4</a>)</td></tr>
+<tr name="244" id="244">
+<td>244</td><td>  <span class="br">{</span></td></tr>
+<tr name="245" id="245">
+<td>245</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA1 Stream4 */</span></td></tr>
+<tr name="246" id="246">
+<td>246</td><td>    <a id="246c5" class="tk">DMA1</a>-&gt;<a id="246c11" class="tk">HIFCR</a> = <a id="246c19" class="tk">DMA_Stream4_IT_MASK</a>;</td></tr>
+<tr name="247" id="247">
+<td>247</td><td>  <span class="br">}</span></td></tr>
+<tr name="248" id="248">
+<td>248</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="248c12" class="tk">DMAy_Streamx</a> <a id="248c25" class="tk">==</a> <a id="248c28" class="tk">DMA1_Stream5</a>)</td></tr>
+<tr name="249" id="249">
+<td>249</td><td>  <span class="br">{</span></td></tr>
+<tr name="250" id="250">
+<td>250</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA1 Stream5 */</span></td></tr>
+<tr name="251" id="251">
+<td>251</td><td>    <a id="251c5" class="tk">DMA1</a>-&gt;<a id="251c11" class="tk">HIFCR</a> = <a id="251c19" class="tk">DMA_Stream5_IT_MASK</a>;</td></tr>
+<tr name="252" id="252">
+<td>252</td><td>  <span class="br">}</span></td></tr>
+<tr name="253" id="253">
+<td>253</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="253c12" class="tk">DMAy_Streamx</a> <a id="253c25" class="tk">==</a> <a id="253c28" class="tk">DMA1_Stream6</a>)</td></tr>
+<tr name="254" id="254">
+<td>254</td><td>  <span class="br">{</span></td></tr>
+<tr name="255" id="255">
+<td>255</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA1 Stream6 */</span></td></tr>
+<tr name="256" id="256">
+<td>256</td><td>    <a id="256c5" class="tk">DMA1</a>-&gt;<a id="256c11" class="tk">HIFCR</a> = (<a id="256c20" class="tk">uint32_t</a>)<a id="256c29" class="tk">DMA_Stream6_IT_MASK</a>;</td></tr>
+<tr name="257" id="257">
+<td>257</td><td>  <span class="br">}</span></td></tr>
+<tr name="258" id="258">
+<td>258</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="258c12" class="tk">DMAy_Streamx</a> <a id="258c25" class="tk">==</a> <a id="258c28" class="tk">DMA1_Stream7</a>)</td></tr>
+<tr name="259" id="259">
+<td>259</td><td>  <span class="br">{</span></td></tr>
+<tr name="260" id="260">
+<td>260</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA1 Stream7 */</span></td></tr>
+<tr name="261" id="261">
+<td>261</td><td>    <a id="261c5" class="tk">DMA1</a>-&gt;<a id="261c11" class="tk">HIFCR</a> = <a id="261c19" class="tk">DMA_Stream7_IT_MASK</a>;</td></tr>
+<tr name="262" id="262">
+<td>262</td><td>  <span class="br">}</span></td></tr>
+<tr name="263" id="263">
+<td>263</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="263c12" class="tk">DMAy_Streamx</a> <a id="263c25" class="tk">==</a> <a id="263c28" class="tk">DMA2_Stream0</a>)</td></tr>
+<tr name="264" id="264">
+<td>264</td><td>  <span class="br">{</span></td></tr>
+<tr name="265" id="265">
+<td>265</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA2 Stream0 */</span></td></tr>
+<tr name="266" id="266">
+<td>266</td><td>    <a id="266c5" class="tk">DMA2</a>-&gt;<a id="266c11" class="tk">LIFCR</a> = <a id="266c19" class="tk">DMA_Stream0_IT_MASK</a>;</td></tr>
+<tr name="267" id="267">
+<td>267</td><td>  <span class="br">}</span></td></tr>
+<tr name="268" id="268">
+<td>268</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="268c12" class="tk">DMAy_Streamx</a> <a id="268c25" class="tk">==</a> <a id="268c28" class="tk">DMA2_Stream1</a>)</td></tr>
+<tr name="269" id="269">
+<td>269</td><td>  <span class="br">{</span></td></tr>
+<tr name="270" id="270">
+<td>270</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA2 Stream1 */</span></td></tr>
+<tr name="271" id="271">
+<td>271</td><td>    <a id="271c5" class="tk">DMA2</a>-&gt;<a id="271c11" class="tk">LIFCR</a> = <a id="271c19" class="tk">DMA_Stream1_IT_MASK</a>;</td></tr>
+<tr name="272" id="272">
+<td>272</td><td>  <span class="br">}</span></td></tr>
+<tr name="273" id="273">
+<td>273</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="273c12" class="tk">DMAy_Streamx</a> <a id="273c25" class="tk">==</a> <a id="273c28" class="tk">DMA2_Stream2</a>)</td></tr>
+<tr name="274" id="274">
+<td>274</td><td>  <span class="br">{</span></td></tr>
+<tr name="275" id="275">
+<td>275</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA2 Stream2 */</span></td></tr>
+<tr name="276" id="276">
+<td>276</td><td>    <a id="276c5" class="tk">DMA2</a>-&gt;<a id="276c11" class="tk">LIFCR</a> = <a id="276c19" class="tk">DMA_Stream2_IT_MASK</a>;</td></tr>
+<tr name="277" id="277">
+<td>277</td><td>  <span class="br">}</span></td></tr>
+<tr name="278" id="278">
+<td>278</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="278c12" class="tk">DMAy_Streamx</a> <a id="278c25" class="tk">==</a> <a id="278c28" class="tk">DMA2_Stream3</a>)</td></tr>
+<tr name="279" id="279">
+<td>279</td><td>  <span class="br">{</span></td></tr>
+<tr name="280" id="280">
+<td>280</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA2 Stream3 */</span></td></tr>
+<tr name="281" id="281">
+<td>281</td><td>    <a id="281c5" class="tk">DMA2</a>-&gt;<a id="281c11" class="tk">LIFCR</a> = <a id="281c19" class="tk">DMA_Stream3_IT_MASK</a>;</td></tr>
+<tr name="282" id="282">
+<td>282</td><td>  <span class="br">}</span></td></tr>
+<tr name="283" id="283">
+<td>283</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="283c12" class="tk">DMAy_Streamx</a> <a id="283c25" class="tk">==</a> <a id="283c28" class="tk">DMA2_Stream4</a>)</td></tr>
+<tr name="284" id="284">
+<td>284</td><td>  <span class="br">{</span></td></tr>
+<tr name="285" id="285">
+<td>285</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA2 Stream4 */</span></td></tr>
+<tr name="286" id="286">
+<td>286</td><td>    <a id="286c5" class="tk">DMA2</a>-&gt;<a id="286c11" class="tk">HIFCR</a> = <a id="286c19" class="tk">DMA_Stream4_IT_MASK</a>;</td></tr>
+<tr name="287" id="287">
+<td>287</td><td>  <span class="br">}</span></td></tr>
+<tr name="288" id="288">
+<td>288</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="288c12" class="tk">DMAy_Streamx</a> <a id="288c25" class="tk">==</a> <a id="288c28" class="tk">DMA2_Stream5</a>)</td></tr>
+<tr name="289" id="289">
+<td>289</td><td>  <span class="br">{</span></td></tr>
+<tr name="290" id="290">
+<td>290</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA2 Stream5 */</span></td></tr>
+<tr name="291" id="291">
+<td>291</td><td>    <a id="291c5" class="tk">DMA2</a>-&gt;<a id="291c11" class="tk">HIFCR</a> = <a id="291c19" class="tk">DMA_Stream5_IT_MASK</a>;</td></tr>
+<tr name="292" id="292">
+<td>292</td><td>  <span class="br">}</span></td></tr>
+<tr name="293" id="293">
+<td>293</td><td>  <span class="kw">else</span> <span class="kw">if</span> (<a id="293c12" class="tk">DMAy_Streamx</a> <a id="293c25" class="tk">==</a> <a id="293c28" class="tk">DMA2_Stream6</a>)</td></tr>
+<tr name="294" id="294">
+<td>294</td><td>  <span class="br">{</span></td></tr>
+<tr name="295" id="295">
+<td>295</td><td>    <span class="ct">/* Reset interrupt pending bits for DMA2 Stream6 */</span></td></tr>
+<tr name="296" id="296">
+<td>296</td><td>    <a id="296c5" class="tk">DMA2</a>-&gt;<a id="296c11" class="tk">HIFCR</a> = <a id="296c19" class="tk">DMA_Stream6_IT_MASK</a>;</td></tr>
+<tr name="297" id="297">
+<td>297</td><td>  <span class="br">}</span></td></tr>
+<tr name="298" id="298">
+<td>298</td><td>  <span class="kw">else</span> </td></tr>
+<tr name="299" id="299">
+<td>299</td><td>  <span class="br">{</span></td></tr>
+<tr name="300" id="300">
+<td>300</td><td>    <span class="kw">if</span> (<a id="300c9" class="tk">DMAy_Streamx</a> <a id="300c22" class="tk">==</a> <a id="300c25" class="tk">DMA2_Stream7</a>)</td></tr>
+<tr name="301" id="301">
+<td>301</td><td>    <span class="br">{</span></td></tr>
+<tr name="302" id="302">
+<td>302</td><td>      <span class="ct">/* Reset interrupt pending bits for DMA2 Stream7 */</span></td></tr>
+<tr name="303" id="303">
+<td>303</td><td>      <a id="303c7" class="tk">DMA2</a>-&gt;<a id="303c13" class="tk">HIFCR</a> = <a id="303c21" class="tk">DMA_Stream7_IT_MASK</a>;</td></tr>
+<tr name="304" id="304">
+<td>304</td><td>    <span class="br">}</span></td></tr>
+<tr name="305" id="305">
+<td>305</td><td>  <span class="br">}</span></td></tr>
+<tr name="306" id="306">
+<td>306</td><td><span class="br">}</span></td></tr>
+<tr name="307" id="307">
+<td>307</td><td></td></tr>
+<tr name="308" id="308">
+<td>308</td><td><span class="ct">/**</span></td></tr>
+<tr name="309" id="309">
+<td>309</td><td><span class="ct">  * @brief  Initializes the DMAy Streamx according to the specified parameters in </span></td></tr>
+<tr name="310" id="310">
+<td>310</td><td><span class="ct">  *         the DMA_InitStruct structure.</span></td></tr>
+<tr name="311" id="311">
+<td>311</td><td><span class="ct">  * @note   Before calling this function, it is recommended to check that the Stream </span></td></tr>
+<tr name="312" id="312">
+<td>312</td><td><span class="ct">  *         is actually disabled using the function DMA_GetCmdStatus().  </span></td></tr>
+<tr name="313" id="313">
+<td>313</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="314" id="314">
+<td>314</td><td><span class="ct">  *         to 7 to select the DMA Stream.</span></td></tr>
+<tr name="315" id="315">
+<td>315</td><td><span class="ct">  * @param  DMA_InitStruct: pointer to a DMA_InitTypeDef structure that contains</span></td></tr>
+<tr name="316" id="316">
+<td>316</td><td><span class="ct">  *         the configuration information for the specified DMA Stream.  </span></td></tr>
+<tr name="317" id="317">
+<td>317</td><td><span class="ct">  * @retval None</span></td></tr>
+<tr name="318" id="318">
+<td>318</td><td><span class="ct">  */</span></td></tr>
+<tr name="319" id="319">
+<td>319</td><td><span class="kw">void</span> <a id="319c6" class="tk">DMA_Init</a>(<a id="319c15" class="tk">DMA_Stream_TypeDef</a><a id="319c33" class="tk">*</a> <a id="319c35" class="tk">DMAy_Streamx</a>, <a id="319c49" class="tk">DMA_InitTypeDef</a><a id="319c64" class="tk">*</a> <a id="319c66" class="tk">DMA_InitStruct</a>)</td></tr>
+<tr name="320" id="320">
+<td>320</td><td><span class="br">{</span></td></tr>
+<tr name="321" id="321">
+<td>321</td><td>  <a id="321c3" class="tk">uint32_t</a> <a id="321c12" class="tk">tmpreg</a> = 0;</td></tr>
+<tr name="322" id="322">
+<td>322</td><td></td></tr>
+<tr name="323" id="323">
+<td>323</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="324" id="324">
+<td>324</td><td>  <a id="324c3" class="tk">assert_param</a>(<a id="324c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="324c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="325" id="325">
+<td>325</td><td>  <a id="325c3" class="tk">assert_param</a>(<a id="325c16" class="tk">IS_DMA_CHANNEL</a>(<a id="325c31" class="tk">DMA_InitStruct</a>-&gt;<a id="325c47" class="tk">DMA_Channel</a>));</td></tr>
+<tr name="326" id="326">
+<td>326</td><td>  <a id="326c3" class="tk">assert_param</a>(<a id="326c16" class="tk">IS_DMA_DIRECTION</a>(<a id="326c33" class="tk">DMA_InitStruct</a>-&gt;<a id="326c49" class="tk">DMA_DIR</a>));</td></tr>
+<tr name="327" id="327">
+<td>327</td><td>  <a id="327c3" class="tk">assert_param</a>(<a id="327c16" class="tk">IS_DMA_BUFFER_SIZE</a>(<a id="327c35" class="tk">DMA_InitStruct</a>-&gt;<a id="327c51" class="tk">DMA_BufferSize</a>));</td></tr>
+<tr name="328" id="328">
+<td>328</td><td>  <a id="328c3" class="tk">assert_param</a>(<a id="328c16" class="tk">IS_DMA_PERIPHERAL_INC_STATE</a>(<a id="328c44" class="tk">DMA_InitStruct</a>-&gt;<a id="328c60" class="tk">DMA_PeripheralInc</a>));</td></tr>
+<tr name="329" id="329">
+<td>329</td><td>  <a id="329c3" class="tk">assert_param</a>(<a id="329c16" class="tk">IS_DMA_MEMORY_INC_STATE</a>(<a id="329c40" class="tk">DMA_InitStruct</a>-&gt;<a id="329c56" class="tk">DMA_MemoryInc</a>));</td></tr>
+<tr name="330" id="330">
+<td>330</td><td>  <a id="330c3" class="tk">assert_param</a>(<a id="330c16" class="tk">IS_DMA_PERIPHERAL_DATA_SIZE</a>(<a id="330c44" class="tk">DMA_InitStruct</a>-&gt;<a id="330c60" class="tk">DMA_PeripheralDataSize</a>));</td></tr>
+<tr name="331" id="331">
+<td>331</td><td>  <a id="331c3" class="tk">assert_param</a>(<a id="331c16" class="tk">IS_DMA_MEMORY_DATA_SIZE</a>(<a id="331c40" class="tk">DMA_InitStruct</a>-&gt;<a id="331c56" class="tk">DMA_MemoryDataSize</a>));</td></tr>
+<tr name="332" id="332">
+<td>332</td><td>  <a id="332c3" class="tk">assert_param</a>(<a id="332c16" class="tk">IS_DMA_MODE</a>(<a id="332c28" class="tk">DMA_InitStruct</a>-&gt;<a id="332c44" class="tk">DMA_Mode</a>));</td></tr>
+<tr name="333" id="333">
+<td>333</td><td>  <a id="333c3" class="tk">assert_param</a>(<a id="333c16" class="tk">IS_DMA_PRIORITY</a>(<a id="333c32" class="tk">DMA_InitStruct</a>-&gt;<a id="333c48" class="tk">DMA_Priority</a>));</td></tr>
+<tr name="334" id="334">
+<td>334</td><td>  <a id="334c3" class="tk">assert_param</a>(<a id="334c16" class="tk">IS_DMA_FIFO_MODE_STATE</a>(<a id="334c39" class="tk">DMA_InitStruct</a>-&gt;<a id="334c55" class="tk">DMA_FIFOMode</a>));</td></tr>
+<tr name="335" id="335">
+<td>335</td><td>  <a id="335c3" class="tk">assert_param</a>(<a id="335c16" class="tk">IS_DMA_FIFO_THRESHOLD</a>(<a id="335c38" class="tk">DMA_InitStruct</a>-&gt;<a id="335c54" class="tk">DMA_FIFOThreshold</a>));</td></tr>
+<tr name="336" id="336">
+<td>336</td><td>  <a id="336c3" class="tk">assert_param</a>(<a id="336c16" class="tk">IS_DMA_MEMORY_BURST</a>(<a id="336c36" class="tk">DMA_InitStruct</a>-&gt;<a id="336c52" class="tk">DMA_MemoryBurst</a>));</td></tr>
+<tr name="337" id="337">
+<td>337</td><td>  <a id="337c3" class="tk">assert_param</a>(<a id="337c16" class="tk">IS_DMA_PERIPHERAL_BURST</a>(<a id="337c40" class="tk">DMA_InitStruct</a>-&gt;<a id="337c56" class="tk">DMA_PeripheralBurst</a>));</td></tr>
+<tr name="338" id="338">
+<td>338</td><td></td></tr>
+<tr name="339" id="339">
+<td>339</td><td>  <span class="ct">/*------------------------- DMAy Streamx CR Configuration ------------------*/</span></td></tr>
+<tr name="340" id="340">
+<td>340</td><td>  <span class="ct">/* Get the DMAy_Streamx CR value */</span></td></tr>
+<tr name="341" id="341">
+<td>341</td><td>  <a id="341c3" class="tk">tmpreg</a> = <a id="341c12" class="tk">DMAy_Streamx</a>-&gt;<a id="341c26" class="tk">CR</a>;</td></tr>
+<tr name="342" id="342">
+<td>342</td><td></td></tr>
+<tr name="343" id="343">
+<td>343</td><td>  <span class="ct">/* Clear CHSEL, MBURST, PBURST, PL, MSIZE, PSIZE, MINC, PINC, CIRC and DIR bits */</span></td></tr>
+<tr name="344" id="344">
+<td>344</td><td>  <a id="344c3" class="tk">tmpreg</a> <a id="344c10" class="tk">&amp;=</a> ((<a id="344c15" class="tk">uint32_t</a>)<a id="344c24" class="tk">~</a>(<a id="344c26" class="tk">DMA_SxCR_CHSEL</a> <a id="344c41" class="tk">|</a> <a id="344c43" class="tk">DMA_SxCR_MBURST</a> <a id="344c59" class="tk">|</a> <a id="344c61" class="tk">DMA_SxCR_PBURST</a> <a id="344c77" class="tk">|</a> \</td></tr>
+<tr name="345" id="345">
+<td>345</td><td>                         <a id="345c104" class="tk">DMA_SxCR_PL</a> <a id="345c116" class="tk">|</a> <a id="345c118" class="tk">DMA_SxCR_MSIZE</a> <a id="345c133" class="tk">|</a> <a id="345c135" class="tk">DMA_SxCR_PSIZE</a> <a id="345c150" class="tk">|</a> \</td></tr>
+<tr name="346" id="346">
+<td>346</td><td>                         <a id="346c177" class="tk">DMA_SxCR_MINC</a> <a id="346c191" class="tk">|</a> <a id="346c193" class="tk">DMA_SxCR_PINC</a> <a id="346c207" class="tk">|</a> <a id="346c209" class="tk">DMA_SxCR_CIRC</a> <a id="346c223" class="tk">|</a> \</td></tr>
+<tr name="347" id="347">
+<td>347</td><td>                         <a id="347c250" class="tk">DMA_SxCR_DIR</a>));</td></tr>
+<tr name="348" id="348">
+<td>348</td><td></td></tr>
+<tr name="349" id="349">
+<td>349</td><td>  <span class="ct">/* Configure DMAy Streamx: */</span></td></tr>
+<tr name="350" id="350">
+<td>350</td><td>  <span class="ct">/* Set CHSEL bits according to DMA_CHSEL value */</span></td></tr>
+<tr name="351" id="351">
+<td>351</td><td>  <span class="ct">/* Set DIR bits according to DMA_DIR value */</span></td></tr>
+<tr name="352" id="352">
+<td>352</td><td>  <span class="ct">/* Set PINC bit according to DMA_PeripheralInc value */</span></td></tr>
+<tr name="353" id="353">
+<td>353</td><td>  <span class="ct">/* Set MINC bit according to DMA_MemoryInc value */</span></td></tr>
+<tr name="354" id="354">
+<td>354</td><td>  <span class="ct">/* Set PSIZE bits according to DMA_PeripheralDataSize value */</span></td></tr>
+<tr name="355" id="355">
+<td>355</td><td>  <span class="ct">/* Set MSIZE bits according to DMA_MemoryDataSize value */</span></td></tr>
+<tr name="356" id="356">
+<td>356</td><td>  <span class="ct">/* Set CIRC bit according to DMA_Mode value */</span></td></tr>
+<tr name="357" id="357">
+<td>357</td><td>  <span class="ct">/* Set PL bits according to DMA_Priority value */</span></td></tr>
+<tr name="358" id="358">
+<td>358</td><td>  <span class="ct">/* Set MBURST bits according to DMA_MemoryBurst value */</span></td></tr>
+<tr name="359" id="359">
+<td>359</td><td>  <span class="ct">/* Set PBURST bits according to DMA_PeripheralBurst value */</span></td></tr>
+<tr name="360" id="360">
+<td>360</td><td>  <a id="360c3" class="tk">tmpreg</a> <a id="360c10" class="tk">|=</a> <a id="360c13" class="tk">DMA_InitStruct</a>-&gt;<a id="360c29" class="tk">DMA_Channel</a> <a id="360c41" class="tk">|</a> <a id="360c43" class="tk">DMA_InitStruct</a>-&gt;<a id="360c59" class="tk">DMA_DIR</a> <a id="360c67" class="tk">|</a></td></tr>
+<tr name="361" id="361">
+<td>361</td><td>            <a id="361c13" class="tk">DMA_InitStruct</a>-&gt;<a id="361c29" class="tk">DMA_PeripheralInc</a> <a id="361c47" class="tk">|</a> <a id="361c49" class="tk">DMA_InitStruct</a>-&gt;<a id="361c65" class="tk">DMA_MemoryInc</a> <a id="361c79" class="tk">|</a></td></tr>
+<tr name="362" id="362">
+<td>362</td><td>            <a id="362c13" class="tk">DMA_InitStruct</a>-&gt;<a id="362c29" class="tk">DMA_PeripheralDataSize</a> <a id="362c52" class="tk">|</a> <a id="362c54" class="tk">DMA_InitStruct</a>-&gt;<a id="362c70" class="tk">DMA_MemoryDataSize</a> <a id="362c89" class="tk">|</a></td></tr>
+<tr name="363" id="363">
+<td>363</td><td>            <a id="363c13" class="tk">DMA_InitStruct</a>-&gt;<a id="363c29" class="tk">DMA_Mode</a> <a id="363c38" class="tk">|</a> <a id="363c40" class="tk">DMA_InitStruct</a>-&gt;<a id="363c56" class="tk">DMA_Priority</a> <a id="363c69" class="tk">|</a></td></tr>
+<tr name="364" id="364">
+<td>364</td><td>            <a id="364c13" class="tk">DMA_InitStruct</a>-&gt;<a id="364c29" class="tk">DMA_MemoryBurst</a> <a id="364c45" class="tk">|</a> <a id="364c47" class="tk">DMA_InitStruct</a>-&gt;<a id="364c63" class="tk">DMA_PeripheralBurst</a>;</td></tr>
+<tr name="365" id="365">
+<td>365</td><td></td></tr>
+<tr name="366" id="366">
+<td>366</td><td>  <span class="ct">/* Write to DMAy Streamx CR register */</span></td></tr>
+<tr name="367" id="367">
+<td>367</td><td>  <a id="367c3" class="tk">DMAy_Streamx</a>-&gt;<a id="367c17" class="tk">CR</a> = <a id="367c22" class="tk">tmpreg</a>;</td></tr>
+<tr name="368" id="368">
+<td>368</td><td></td></tr>
+<tr name="369" id="369">
+<td>369</td><td>  <span class="ct">/*------------------------- DMAy Streamx FCR Configuration -----------------*/</span></td></tr>
+<tr name="370" id="370">
+<td>370</td><td>  <span class="ct">/* Get the DMAy_Streamx FCR value */</span></td></tr>
+<tr name="371" id="371">
+<td>371</td><td>  <a id="371c3" class="tk">tmpreg</a> = <a id="371c12" class="tk">DMAy_Streamx</a>-&gt;<a id="371c26" class="tk">FCR</a>;</td></tr>
+<tr name="372" id="372">
+<td>372</td><td></td></tr>
+<tr name="373" id="373">
+<td>373</td><td>  <span class="ct">/* Clear DMDIS and FTH bits */</span></td></tr>
+<tr name="374" id="374">
+<td>374</td><td>  <a id="374c3" class="tk">tmpreg</a> <a id="374c10" class="tk">&amp;=</a> (<a id="374c14" class="tk">uint32_t</a>)<a id="374c23" class="tk">~</a>(<a id="374c25" class="tk">DMA_SxFCR_DMDIS</a> <a id="374c41" class="tk">|</a> <a id="374c43" class="tk">DMA_SxFCR_FTH</a>);</td></tr>
+<tr name="375" id="375">
+<td>375</td><td></td></tr>
+<tr name="376" id="376">
+<td>376</td><td>  <span class="ct">/* Configure DMAy Streamx FIFO: </span></td></tr>
+<tr name="377" id="377">
+<td>377</td><td><span class="ct">    Set DMDIS bits according to DMA_FIFOMode value </span></td></tr>
+<tr name="378" id="378">
+<td>378</td><td><span class="ct">    Set FTH bits according to DMA_FIFOThreshold value */</span></td></tr>
+<tr name="379" id="379">
+<td>379</td><td>  <a id="379c3" class="tk">tmpreg</a> <a id="379c10" class="tk">|=</a> <a id="379c13" class="tk">DMA_InitStruct</a>-&gt;<a id="379c29" class="tk">DMA_FIFOMode</a> <a id="379c42" class="tk">|</a> <a id="379c44" class="tk">DMA_InitStruct</a>-&gt;<a id="379c60" class="tk">DMA_FIFOThreshold</a>;</td></tr>
+<tr name="380" id="380">
+<td>380</td><td></td></tr>
+<tr name="381" id="381">
+<td>381</td><td>  <span class="ct">/* Write to DMAy Streamx CR */</span></td></tr>
+<tr name="382" id="382">
+<td>382</td><td>  <a id="382c3" class="tk">DMAy_Streamx</a>-&gt;<a id="382c17" class="tk">FCR</a> = <a id="382c23" class="tk">tmpreg</a>;</td></tr>
+<tr name="383" id="383">
+<td>383</td><td></td></tr>
+<tr name="384" id="384">
+<td>384</td><td>  <span class="ct">/*------------------------- DMAy Streamx NDTR Configuration ----------------*/</span></td></tr>
+<tr name="385" id="385">
+<td>385</td><td>  <span class="ct">/* Write to DMAy Streamx NDTR register */</span></td></tr>
+<tr name="386" id="386">
+<td>386</td><td>  <a id="386c3" class="tk">DMAy_Streamx</a>-&gt;<a id="386c17" class="tk">NDTR</a> = <a id="386c24" class="tk">DMA_InitStruct</a>-&gt;<a id="386c40" class="tk">DMA_BufferSize</a>;</td></tr>
+<tr name="387" id="387">
+<td>387</td><td></td></tr>
+<tr name="388" id="388">
+<td>388</td><td>  <span class="ct">/*------------------------- DMAy Streamx PAR Configuration -----------------*/</span></td></tr>
+<tr name="389" id="389">
+<td>389</td><td>  <span class="ct">/* Write to DMAy Streamx PAR */</span></td></tr>
+<tr name="390" id="390">
+<td>390</td><td>  <a id="390c3" class="tk">DMAy_Streamx</a>-&gt;<a id="390c17" class="tk">PAR</a> = <a id="390c23" class="tk">DMA_InitStruct</a>-&gt;<a id="390c39" class="tk">DMA_PeripheralBaseAddr</a>;</td></tr>
+<tr name="391" id="391">
+<td>391</td><td></td></tr>
+<tr name="392" id="392">
+<td>392</td><td>  <span class="ct">/*------------------------- DMAy Streamx M0AR Configuration ----------------*/</span></td></tr>
+<tr name="393" id="393">
+<td>393</td><td>  <span class="ct">/* Write to DMAy Streamx M0AR */</span></td></tr>
+<tr name="394" id="394">
+<td>394</td><td>  <a id="394c3" class="tk">DMAy_Streamx</a>-&gt;<a id="394c17" class="tk">M0AR</a> = <a id="394c24" class="tk">DMA_InitStruct</a>-&gt;<a id="394c40" class="tk">DMA_Memory0BaseAddr</a>;</td></tr>
+<tr name="395" id="395">
+<td>395</td><td><span class="br">}</span></td></tr>
+<tr name="396" id="396">
+<td>396</td><td></td></tr>
+<tr name="397" id="397">
+<td>397</td><td><span class="ct">/**</span></td></tr>
+<tr name="398" id="398">
+<td>398</td><td><span class="ct">  * @brief  Fills each DMA_InitStruct member with its default value.</span></td></tr>
+<tr name="399" id="399">
+<td>399</td><td><span class="ct">  * @param  DMA_InitStruct : pointer to a DMA_InitTypeDef structure which will </span></td></tr>
+<tr name="400" id="400">
+<td>400</td><td><span class="ct">  *         be initialized.</span></td></tr>
+<tr name="401" id="401">
+<td>401</td><td><span class="ct">  * @retval None</span></td></tr>
+<tr name="402" id="402">
+<td>402</td><td><span class="ct">  */</span></td></tr>
+<tr name="403" id="403">
+<td>403</td><td><span class="kw">void</span> <a id="403c6" class="tk">DMA_StructInit</a>(<a id="403c21" class="tk">DMA_InitTypeDef</a><a id="403c36" class="tk">*</a> <a id="403c38" class="tk">DMA_InitStruct</a>)</td></tr>
+<tr name="404" id="404">
+<td>404</td><td><span class="br">{</span></td></tr>
+<tr name="405" id="405">
+<td>405</td><td>  <span class="ct">/*-------------- Reset DMA init structure parameters values ----------------*/</span></td></tr>
+<tr name="406" id="406">
+<td>406</td><td>  <span class="ct">/* Initialize the DMA_Channel member */</span></td></tr>
+<tr name="407" id="407">
+<td>407</td><td>  <a id="407c3" class="tk">DMA_InitStruct</a>-&gt;<a id="407c19" class="tk">DMA_Channel</a> = 0;</td></tr>
+<tr name="408" id="408">
+<td>408</td><td></td></tr>
+<tr name="409" id="409">
+<td>409</td><td>  <span class="ct">/* Initialize the DMA_PeripheralBaseAddr member */</span></td></tr>
+<tr name="410" id="410">
+<td>410</td><td>  <a id="410c3" class="tk">DMA_InitStruct</a>-&gt;<a id="410c19" class="tk">DMA_PeripheralBaseAddr</a> = 0;</td></tr>
+<tr name="411" id="411">
+<td>411</td><td></td></tr>
+<tr name="412" id="412">
+<td>412</td><td>  <span class="ct">/* Initialize the DMA_Memory0BaseAddr member */</span></td></tr>
+<tr name="413" id="413">
+<td>413</td><td>  <a id="413c3" class="tk">DMA_InitStruct</a>-&gt;<a id="413c19" class="tk">DMA_Memory0BaseAddr</a> = 0;</td></tr>
+<tr name="414" id="414">
+<td>414</td><td></td></tr>
+<tr name="415" id="415">
+<td>415</td><td>  <span class="ct">/* Initialize the DMA_DIR member */</span></td></tr>
+<tr name="416" id="416">
+<td>416</td><td>  <a id="416c3" class="tk">DMA_InitStruct</a>-&gt;<a id="416c19" class="tk">DMA_DIR</a> = <a id="416c29" class="tk">DMA_DIR_PeripheralToMemory</a>;</td></tr>
+<tr name="417" id="417">
+<td>417</td><td></td></tr>
+<tr name="418" id="418">
+<td>418</td><td>  <span class="ct">/* Initialize the DMA_BufferSize member */</span></td></tr>
+<tr name="419" id="419">
+<td>419</td><td>  <a id="419c3" class="tk">DMA_InitStruct</a>-&gt;<a id="419c19" class="tk">DMA_BufferSize</a> = 0;</td></tr>
+<tr name="420" id="420">
+<td>420</td><td></td></tr>
+<tr name="421" id="421">
+<td>421</td><td>  <span class="ct">/* Initialize the DMA_PeripheralInc member */</span></td></tr>
+<tr name="422" id="422">
+<td>422</td><td>  <a id="422c3" class="tk">DMA_InitStruct</a>-&gt;<a id="422c19" class="tk">DMA_PeripheralInc</a> = <a id="422c39" class="tk">DMA_PeripheralInc_Disable</a>;</td></tr>
+<tr name="423" id="423">
+<td>423</td><td></td></tr>
+<tr name="424" id="424">
+<td>424</td><td>  <span class="ct">/* Initialize the DMA_MemoryInc member */</span></td></tr>
+<tr name="425" id="425">
+<td>425</td><td>  <a id="425c3" class="tk">DMA_InitStruct</a>-&gt;<a id="425c19" class="tk">DMA_MemoryInc</a> = <a id="425c35" class="tk">DMA_MemoryInc_Disable</a>;</td></tr>
+<tr name="426" id="426">
+<td>426</td><td></td></tr>
+<tr name="427" id="427">
+<td>427</td><td>  <span class="ct">/* Initialize the DMA_PeripheralDataSize member */</span></td></tr>
+<tr name="428" id="428">
+<td>428</td><td>  <a id="428c3" class="tk">DMA_InitStruct</a>-&gt;<a id="428c19" class="tk">DMA_PeripheralDataSize</a> = <a id="428c44" class="tk">DMA_PeripheralDataSize_Byte</a>;</td></tr>
+<tr name="429" id="429">
+<td>429</td><td></td></tr>
+<tr name="430" id="430">
+<td>430</td><td>  <span class="ct">/* Initialize the DMA_MemoryDataSize member */</span></td></tr>
+<tr name="431" id="431">
+<td>431</td><td>  <a id="431c3" class="tk">DMA_InitStruct</a>-&gt;<a id="431c19" class="tk">DMA_MemoryDataSize</a> = <a id="431c40" class="tk">DMA_MemoryDataSize_Byte</a>;</td></tr>
+<tr name="432" id="432">
+<td>432</td><td></td></tr>
+<tr name="433" id="433">
+<td>433</td><td>  <span class="ct">/* Initialize the DMA_Mode member */</span></td></tr>
+<tr name="434" id="434">
+<td>434</td><td>  <a id="434c3" class="tk">DMA_InitStruct</a>-&gt;<a id="434c19" class="tk">DMA_Mode</a> = <a id="434c30" class="tk">DMA_Mode_Normal</a>;</td></tr>
+<tr name="435" id="435">
+<td>435</td><td></td></tr>
+<tr name="436" id="436">
+<td>436</td><td>  <span class="ct">/* Initialize the DMA_Priority member */</span></td></tr>
+<tr name="437" id="437">
+<td>437</td><td>  <a id="437c3" class="tk">DMA_InitStruct</a>-&gt;<a id="437c19" class="tk">DMA_Priority</a> = <a id="437c34" class="tk">DMA_Priority_Low</a>;</td></tr>
+<tr name="438" id="438">
+<td>438</td><td></td></tr>
+<tr name="439" id="439">
+<td>439</td><td>  <span class="ct">/* Initialize the DMA_FIFOMode member */</span></td></tr>
+<tr name="440" id="440">
+<td>440</td><td>  <a id="440c3" class="tk">DMA_InitStruct</a>-&gt;<a id="440c19" class="tk">DMA_FIFOMode</a> = <a id="440c34" class="tk">DMA_FIFOMode_Disable</a>;</td></tr>
+<tr name="441" id="441">
+<td>441</td><td></td></tr>
+<tr name="442" id="442">
+<td>442</td><td>  <span class="ct">/* Initialize the DMA_FIFOThreshold member */</span></td></tr>
+<tr name="443" id="443">
+<td>443</td><td>  <a id="443c3" class="tk">DMA_InitStruct</a>-&gt;<a id="443c19" class="tk">DMA_FIFOThreshold</a> = <a id="443c39" class="tk">DMA_FIFOThreshold_1QuarterFull</a>;</td></tr>
+<tr name="444" id="444">
+<td>444</td><td></td></tr>
+<tr name="445" id="445">
+<td>445</td><td>  <span class="ct">/* Initialize the DMA_MemoryBurst member */</span></td></tr>
+<tr name="446" id="446">
+<td>446</td><td>  <a id="446c3" class="tk">DMA_InitStruct</a>-&gt;<a id="446c19" class="tk">DMA_MemoryBurst</a> = <a id="446c37" class="tk">DMA_MemoryBurst_Single</a>;</td></tr>
+<tr name="447" id="447">
+<td>447</td><td></td></tr>
+<tr name="448" id="448">
+<td>448</td><td>  <span class="ct">/* Initialize the DMA_PeripheralBurst member */</span></td></tr>
+<tr name="449" id="449">
+<td>449</td><td>  <a id="449c3" class="tk">DMA_InitStruct</a>-&gt;<a id="449c19" class="tk">DMA_PeripheralBurst</a> = <a id="449c41" class="tk">DMA_PeripheralBurst_Single</a>;</td></tr>
+<tr name="450" id="450">
+<td>450</td><td><span class="br">}</span></td></tr>
+<tr name="451" id="451">
+<td>451</td><td></td></tr>
+<tr name="452" id="452">
+<td>452</td><td><span class="ct">/**</span></td></tr>
+<tr name="453" id="453">
+<td>453</td><td><span class="ct">  * @brief  Enables or disables the specified DMAy Streamx.</span></td></tr>
+<tr name="454" id="454">
+<td>454</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="455" id="455">
+<td>455</td><td><span class="ct">  *         to 7 to select the DMA Stream.</span></td></tr>
+<tr name="456" id="456">
+<td>456</td><td><span class="ct">  * @param  NewState: new state of the DMAy Streamx. </span></td></tr>
+<tr name="457" id="457">
+<td>457</td><td><span class="ct">  *          This parameter can be: ENABLE or DISABLE.</span></td></tr>
+<tr name="458" id="458">
+<td>458</td><td><span class="ct">  *</span></td></tr>
+<tr name="459" id="459">
+<td>459</td><td><span class="ct">  * @note  This function may be used to perform Pause-Resume operation. When a</span></td></tr>
+<tr name="460" id="460">
+<td>460</td><td><span class="ct">  *        transfer is ongoing, calling this function to disable the Stream will</span></td></tr>
+<tr name="461" id="461">
+<td>461</td><td><span class="ct">  *        cause the transfer to be paused. All configuration registers and the</span></td></tr>
+<tr name="462" id="462">
+<td>462</td><td><span class="ct">  *        number of remaining data will be preserved. When calling again this</span></td></tr>
+<tr name="463" id="463">
+<td>463</td><td><span class="ct">  *        function to re-enable the Stream, the transfer will be resumed from</span></td></tr>
+<tr name="464" id="464">
+<td>464</td><td><span class="ct">  *        the point where it was paused.          </span></td></tr>
+<tr name="465" id="465">
+<td>465</td><td><span class="ct">  *    </span></td></tr>
+<tr name="466" id="466">
+<td>466</td><td><span class="ct">  * @note  After configuring the DMA Stream (DMA_Init() function) and enabling the</span></td></tr>
+<tr name="467" id="467">
+<td>467</td><td><span class="ct">  *        stream, it is recommended to check (or wait until) the DMA Stream is</span></td></tr>
+<tr name="468" id="468">
+<td>468</td><td><span class="ct">  *        effectively enabled. A Stream may remain disabled if a configuration </span></td></tr>
+<tr name="469" id="469">
+<td>469</td><td><span class="ct">  *        parameter is wrong.</span></td></tr>
+<tr name="470" id="470">
+<td>470</td><td><span class="ct">  *        After disabling a DMA Stream, it is also recommended to check (or wait</span></td></tr>
+<tr name="471" id="471">
+<td>471</td><td><span class="ct">  *        until) the DMA Stream is effectively disabled. If a Stream is disabled </span></td></tr>
+<tr name="472" id="472">
+<td>472</td><td><span class="ct">  *        while a data transfer is ongoing, the current data will be transferred</span></td></tr>
+<tr name="473" id="473">
+<td>473</td><td><span class="ct">  *        and the Stream will be effectively disabled only after the transfer of</span></td></tr>
+<tr name="474" id="474">
+<td>474</td><td><span class="ct">  *        this single data is finished.            </span></td></tr>
+<tr name="475" id="475">
+<td>475</td><td><span class="ct">  *    </span></td></tr>
+<tr name="476" id="476">
+<td>476</td><td><span class="ct">  * @retval None</span></td></tr>
+<tr name="477" id="477">
+<td>477</td><td><span class="ct">  */</span></td></tr>
+<tr name="478" id="478">
+<td>478</td><td><span class="kw">void</span> <a id="478c6" class="tk">DMA_Cmd</a>(<a id="478c14" class="tk">DMA_Stream_TypeDef</a><a id="478c32" class="tk">*</a> <a id="478c34" class="tk">DMAy_Streamx</a>, <a id="478c48" class="tk">FunctionalState</a> <a id="478c64" class="tk">NewState</a>)</td></tr>
+<tr name="479" id="479">
+<td>479</td><td><span class="br">{</span></td></tr>
+<tr name="480" id="480">
+<td>480</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="481" id="481">
+<td>481</td><td>  <a id="481c3" class="tk">assert_param</a>(<a id="481c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="481c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="482" id="482">
+<td>482</td><td>  <a id="482c3" class="tk">assert_param</a>(<a id="482c16" class="tk">IS_FUNCTIONAL_STATE</a>(<a id="482c36" class="tk">NewState</a>));</td></tr>
+<tr name="483" id="483">
+<td>483</td><td></td></tr>
+<tr name="484" id="484">
+<td>484</td><td>  <span class="kw">if</span> (<a id="484c7" class="tk">NewState</a> <a id="484c16" class="tk">!=</a> <a id="484c19" class="tk">DISABLE</a>)</td></tr>
+<tr name="485" id="485">
+<td>485</td><td>  <span class="br">{</span></td></tr>
+<tr name="486" id="486">
+<td>486</td><td>    <span class="ct">/* Enable the selected DMAy Streamx by setting EN bit */</span></td></tr>
+<tr name="487" id="487">
+<td>487</td><td>    <a id="487c5" class="tk">DMAy_Streamx</a>-&gt;<a id="487c19" class="tk">CR</a> <a id="487c22" class="tk">|=</a> (<a id="487c26" class="tk">uint32_t</a>)<a id="487c35" class="tk">DMA_SxCR_EN</a>;</td></tr>
+<tr name="488" id="488">
+<td>488</td><td>  <span class="br">}</span></td></tr>
+<tr name="489" id="489">
+<td>489</td><td>  <span class="kw">else</span></td></tr>
+<tr name="490" id="490">
+<td>490</td><td>  <span class="br">{</span></td></tr>
+<tr name="491" id="491">
+<td>491</td><td>    <span class="ct">/* Disable the selected DMAy Streamx by clearing EN bit */</span></td></tr>
+<tr name="492" id="492">
+<td>492</td><td>    <a id="492c5" class="tk">DMAy_Streamx</a>-&gt;<a id="492c19" class="tk">CR</a> <a id="492c22" class="tk">&amp;=</a> <a id="492c25" class="tk">~</a>(<a id="492c27" class="tk">uint32_t</a>)<a id="492c36" class="tk">DMA_SxCR_EN</a>;</td></tr>
+<tr name="493" id="493">
+<td>493</td><td>  <span class="br">}</span></td></tr>
+<tr name="494" id="494">
+<td>494</td><td><span class="br">}</span></td></tr>
+<tr name="495" id="495">
+<td>495</td><td></td></tr>
+<tr name="496" id="496">
+<td>496</td><td><span class="ct">/**</span></td></tr>
+<tr name="497" id="497">
+<td>497</td><td><span class="ct">  * @brief  Configures, when the PINC (Peripheral Increment address mode) bit is</span></td></tr>
+<tr name="498" id="498">
+<td>498</td><td><span class="ct">  *         set, if the peripheral address should be incremented with the data </span></td></tr>
+<tr name="499" id="499">
+<td>499</td><td><span class="ct">  *         size (configured with PSIZE bits) or by a fixed offset equal to 4</span></td></tr>
+<tr name="500" id="500">
+<td>500</td><td><span class="ct">  *         (32-bit aligned addresses).</span></td></tr>
+<tr name="501" id="501">
+<td>501</td><td><span class="ct">  *   </span></td></tr>
+<tr name="502" id="502">
+<td>502</td><td><span class="ct">  * @note   This function has no effect if the Peripheral Increment mode is disabled.</span></td></tr>
+<tr name="503" id="503">
+<td>503</td><td><span class="ct">  *     </span></td></tr>
+<tr name="504" id="504">
+<td>504</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="505" id="505">
+<td>505</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="506" id="506">
+<td>506</td><td><span class="ct">  * @param  DMA_Pincos: specifies the Peripheral increment offset size.</span></td></tr>
+<tr name="507" id="507">
+<td>507</td><td><span class="ct">  *          This parameter can be one of the following values:</span></td></tr>
+<tr name="508" id="508">
+<td>508</td><td><span class="ct">  *            @arg DMA_PINCOS_Psize: Peripheral address increment is done  </span></td></tr>
+<tr name="509" id="509">
+<td>509</td><td><span class="ct">  *                                   accordingly to PSIZE parameter.</span></td></tr>
+<tr name="510" id="510">
+<td>510</td><td><span class="ct">  *            @arg DMA_PINCOS_WordAligned: Peripheral address increment offset is </span></td></tr>
+<tr name="511" id="511">
+<td>511</td><td><span class="ct">  *                                         fixed to 4 (32-bit aligned addresses). </span></td></tr>
+<tr name="512" id="512">
+<td>512</td><td><span class="ct">  * @retval None</span></td></tr>
+<tr name="513" id="513">
+<td>513</td><td><span class="ct">  */</span></td></tr>
+<tr name="514" id="514">
+<td>514</td><td><span class="kw">void</span> <a id="514c6" class="tk">DMA_PeriphIncOffsetSizeConfig</a>(<a id="514c36" class="tk">DMA_Stream_TypeDef</a><a id="514c54" class="tk">*</a> <a id="514c56" class="tk">DMAy_Streamx</a>, <a id="514c70" class="tk">uint32_t</a> <a id="514c79" class="tk">DMA_Pincos</a>)</td></tr>
+<tr name="515" id="515">
+<td>515</td><td><span class="br">{</span></td></tr>
+<tr name="516" id="516">
+<td>516</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="517" id="517">
+<td>517</td><td>  <a id="517c3" class="tk">assert_param</a>(<a id="517c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="517c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="518" id="518">
+<td>518</td><td>  <a id="518c3" class="tk">assert_param</a>(<a id="518c16" class="tk">IS_DMA_PINCOS_SIZE</a>(<a id="518c35" class="tk">DMA_Pincos</a>));</td></tr>
+<tr name="519" id="519">
+<td>519</td><td></td></tr>
+<tr name="520" id="520">
+<td>520</td><td>  <span class="ct">/* Check the needed Peripheral increment offset */</span></td></tr>
+<tr name="521" id="521">
+<td>521</td><td>  <span class="kw">if</span>(<a id="521c6" class="tk">DMA_Pincos</a> <a id="521c17" class="tk">!=</a> <a id="521c20" class="tk">DMA_PINCOS_Psize</a>)</td></tr>
+<tr name="522" id="522">
+<td>522</td><td>  <span class="br">{</span></td></tr>
+<tr name="523" id="523">
+<td>523</td><td>    <span class="ct">/* Configure DMA_SxCR_PINCOS bit with the input parameter */</span></td></tr>
+<tr name="524" id="524">
+<td>524</td><td>    <a id="524c5" class="tk">DMAy_Streamx</a>-&gt;<a id="524c19" class="tk">CR</a> <a id="524c22" class="tk">|=</a> (<a id="524c26" class="tk">uint32_t</a>)<a id="524c35" class="tk">DMA_SxCR_PINCOS</a>;     </td></tr>
+<tr name="525" id="525">
+<td>525</td><td>  <span class="br">}</span></td></tr>
+<tr name="526" id="526">
+<td>526</td><td>  <span class="kw">else</span></td></tr>
+<tr name="527" id="527">
+<td>527</td><td>  <span class="br">{</span></td></tr>
+<tr name="528" id="528">
+<td>528</td><td>    <span class="ct">/* Clear the PINCOS bit: Peripheral address incremented according to PSIZE */</span></td></tr>
+<tr name="529" id="529">
+<td>529</td><td>    <a id="529c5" class="tk">DMAy_Streamx</a>-&gt;<a id="529c19" class="tk">CR</a> <a id="529c22" class="tk">&amp;=</a> <a id="529c25" class="tk">~</a>(<a id="529c27" class="tk">uint32_t</a>)<a id="529c36" class="tk">DMA_SxCR_PINCOS</a>;    </td></tr>
+<tr name="530" id="530">
+<td>530</td><td>  <span class="br">}</span></td></tr>
+<tr name="531" id="531">
+<td>531</td><td><span class="br">}</span></td></tr>
+<tr name="532" id="532">
+<td>532</td><td></td></tr>
+<tr name="533" id="533">
+<td>533</td><td><span class="ct">/**</span></td></tr>
+<tr name="534" id="534">
+<td>534</td><td><span class="ct">  * @brief  Configures, when the DMAy Streamx is disabled, the flow controller for</span></td></tr>
+<tr name="535" id="535">
+<td>535</td><td><span class="ct">  *         the next transactions (Peripheral or Memory).</span></td></tr>
+<tr name="536" id="536">
+<td>536</td><td><span class="ct">  *       </span></td></tr>
+<tr name="537" id="537">
+<td>537</td><td><span class="ct">  * @note   Before enabling this feature, check if the used peripheral supports </span></td></tr>
+<tr name="538" id="538">
+<td>538</td><td><span class="ct">  *         the Flow Controller mode or not.    </span></td></tr>
+<tr name="539" id="539">
+<td>539</td><td><span class="ct">  *  </span></td></tr>
+<tr name="540" id="540">
+<td>540</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="541" id="541">
+<td>541</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="542" id="542">
+<td>542</td><td><span class="ct">  * @param  DMA_FlowCtrl: specifies the DMA flow controller.</span></td></tr>
+<tr name="543" id="543">
+<td>543</td><td><span class="ct">  *          This parameter can be one of the following values:</span></td></tr>
+<tr name="544" id="544">
+<td>544</td><td><span class="ct">  *            @arg DMA_FlowCtrl_Memory: DMAy_Streamx transactions flow controller is </span></td></tr>
+<tr name="545" id="545">
+<td>545</td><td><span class="ct">  *                                      the DMA controller.</span></td></tr>
+<tr name="546" id="546">
+<td>546</td><td><span class="ct">  *            @arg DMA_FlowCtrl_Peripheral: DMAy_Streamx transactions flow controller </span></td></tr>
+<tr name="547" id="547">
+<td>547</td><td><span class="ct">  *                                          is the peripheral.    </span></td></tr>
+<tr name="548" id="548">
+<td>548</td><td><span class="ct">  * @retval None</span></td></tr>
+<tr name="549" id="549">
+<td>549</td><td><span class="ct">  */</span></td></tr>
+<tr name="550" id="550">
+<td>550</td><td><span class="kw">void</span> <a id="550c6" class="tk">DMA_FlowControllerConfig</a>(<a id="550c31" class="tk">DMA_Stream_TypeDef</a><a id="550c49" class="tk">*</a> <a id="550c51" class="tk">DMAy_Streamx</a>, <a id="550c65" class="tk">uint32_t</a> <a id="550c74" class="tk">DMA_FlowCtrl</a>)</td></tr>
+<tr name="551" id="551">
+<td>551</td><td><span class="br">{</span></td></tr>
+<tr name="552" id="552">
+<td>552</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="553" id="553">
+<td>553</td><td>  <a id="553c3" class="tk">assert_param</a>(<a id="553c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="553c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="554" id="554">
+<td>554</td><td>  <a id="554c3" class="tk">assert_param</a>(<a id="554c16" class="tk">IS_DMA_FLOW_CTRL</a>(<a id="554c33" class="tk">DMA_FlowCtrl</a>));</td></tr>
+<tr name="555" id="555">
+<td>555</td><td></td></tr>
+<tr name="556" id="556">
+<td>556</td><td>  <span class="ct">/* Check the needed flow controller  */</span></td></tr>
+<tr name="557" id="557">
+<td>557</td><td>  <span class="kw">if</span>(<a id="557c6" class="tk">DMA_FlowCtrl</a> <a id="557c19" class="tk">!=</a> <a id="557c22" class="tk">DMA_FlowCtrl_Memory</a>)</td></tr>
+<tr name="558" id="558">
+<td>558</td><td>  <span class="br">{</span></td></tr>
+<tr name="559" id="559">
+<td>559</td><td>    <span class="ct">/* Configure DMA_SxCR_PFCTRL bit with the input parameter */</span></td></tr>
+<tr name="560" id="560">
+<td>560</td><td>    <a id="560c5" class="tk">DMAy_Streamx</a>-&gt;<a id="560c19" class="tk">CR</a> <a id="560c22" class="tk">|=</a> (<a id="560c26" class="tk">uint32_t</a>)<a id="560c35" class="tk">DMA_SxCR_PFCTRL</a>;   </td></tr>
+<tr name="561" id="561">
+<td>561</td><td>  <span class="br">}</span></td></tr>
+<tr name="562" id="562">
+<td>562</td><td>  <span class="kw">else</span></td></tr>
+<tr name="563" id="563">
+<td>563</td><td>  <span class="br">{</span></td></tr>
+<tr name="564" id="564">
+<td>564</td><td>    <span class="ct">/* Clear the PFCTRL bit: Memory is the flow controller */</span></td></tr>
+<tr name="565" id="565">
+<td>565</td><td>    <a id="565c5" class="tk">DMAy_Streamx</a>-&gt;<a id="565c19" class="tk">CR</a> <a id="565c22" class="tk">&amp;=</a> <a id="565c25" class="tk">~</a>(<a id="565c27" class="tk">uint32_t</a>)<a id="565c36" class="tk">DMA_SxCR_PFCTRL</a>;    </td></tr>
+<tr name="566" id="566">
+<td>566</td><td>  <span class="br">}</span></td></tr>
+<tr name="567" id="567">
+<td>567</td><td><span class="br">}</span></td></tr>
+<tr name="568" id="568">
+<td>568</td><td><span class="ct">/**</span></td></tr>
+<tr name="569" id="569">
+<td>569</td><td><span class="ct">  * @}</span></td></tr>
+<tr name="570" id="570">
+<td>570</td><td><span class="ct">  */</span></td></tr>
+<tr name="571" id="571">
+<td>571</td><td></td></tr>
+<tr name="572" id="572">
+<td>572</td><td><span class="ct">/** @defgroup DMA_Group2 Data Counter functions</span></td></tr>
+<tr name="573" id="573">
+<td>573</td><td><span class="ct"> *  @brief   Data Counter functions </span></td></tr>
+<tr name="574" id="574">
+<td>574</td><td><span class="ct"> *</span></td></tr>
+<tr name="575" id="575">
+<td>575</td><td><span class="ct">@verbatim   </span></td></tr>
+<tr name="576" id="576">
+<td>576</td><td><span class="ct"> ===============================================================================</span></td></tr>
+<tr name="577" id="577">
+<td>577</td><td><span class="ct">                      ##### Data Counter functions #####</span></td></tr>
+<tr name="578" id="578">
+<td>578</td><td><span class="ct"> ===============================================================================  </span></td></tr>
+<tr name="579" id="579">
+<td>579</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="580" id="580">
+<td>580</td><td><span class="ct">    This subsection provides function allowing to configure and read the buffer size</span></td></tr>
+<tr name="581" id="581">
+<td>581</td><td><span class="ct">    (number of data to be transferred). </span></td></tr>
+<tr name="582" id="582">
+<td>582</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="583" id="583">
+<td>583</td><td><span class="ct">    The DMA data counter can be written only when the DMA Stream is disabled </span></td></tr>
+<tr name="584" id="584">
+<td>584</td><td><span class="ct">    (ie. after transfer complete event).</span></td></tr>
+<tr name="585" id="585">
+<td>585</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="586" id="586">
+<td>586</td><td><span class="ct">    The following function can be used to write the Stream data counter value:</span></td></tr>
+<tr name="587" id="587">
+<td>587</td><td><span class="ct">      (+) void DMA_SetCurrDataCounter(DMA_Stream_TypeDef* DMAy_Streamx, uint16_t Counter);</span></td></tr>
+<tr name="588" id="588">
+<td>588</td><td><span class="ct">      -@- It is advised to use this function rather than DMA_Init() in situations </span></td></tr>
+<tr name="589" id="589">
+<td>589</td><td><span class="ct">          where only the Data buffer needs to be reloaded.</span></td></tr>
+<tr name="590" id="590">
+<td>590</td><td><span class="ct">      -@- If the Source and Destination Data Sizes are different, then the value </span></td></tr>
+<tr name="591" id="591">
+<td>591</td><td><span class="ct">          written in data counter, expressing the number of transfers, is relative </span></td></tr>
+<tr name="592" id="592">
+<td>592</td><td><span class="ct">          to the number of transfers from the Peripheral point of view.</span></td></tr>
+<tr name="593" id="593">
+<td>593</td><td><span class="ct">          ie. If Memory data size is Word, Peripheral data size is Half-Words, </span></td></tr>
+<tr name="594" id="594">
+<td>594</td><td><span class="ct">          then the value to be configured in the data counter is the number </span></td></tr>
+<tr name="595" id="595">
+<td>595</td><td><span class="ct">          of Half-Words to be transferred from/to the peripheral.</span></td></tr>
+<tr name="596" id="596">
+<td>596</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="597" id="597">
+<td>597</td><td><span class="ct">    The DMA data counter can be read to indicate the number of remaining transfers for</span></td></tr>
+<tr name="598" id="598">
+<td>598</td><td><span class="ct">    the relative DMA Stream. This counter is decremented at the end of each data </span></td></tr>
+<tr name="599" id="599">
+<td>599</td><td><span class="ct">    transfer and when the transfer is complete: </span></td></tr>
+<tr name="600" id="600">
+<td>600</td><td><span class="ct">      (+) If Normal mode is selected: the counter is set to 0.</span></td></tr>
+<tr name="601" id="601">
+<td>601</td><td><span class="ct">      (+) If Circular mode is selected: the counter is reloaded with the initial value</span></td></tr>
+<tr name="602" id="602">
+<td>602</td><td><span class="ct">          (configured before enabling the DMA Stream)</span></td></tr>
+<tr name="603" id="603">
+<td>603</td><td><span class="ct">     [..]</span></td></tr>
+<tr name="604" id="604">
+<td>604</td><td><span class="ct">     The following function can be used to read the Stream data counter value:</span></td></tr>
+<tr name="605" id="605">
+<td>605</td><td><span class="ct">       (+) uint16_t DMA_GetCurrDataCounter(DMA_Stream_TypeDef* DMAy_Streamx);</span></td></tr>
+<tr name="606" id="606">
+<td>606</td><td><span class="ct"></span></td></tr>
+<tr name="607" id="607">
+<td>607</td><td><span class="ct">@endverbatim</span></td></tr>
+<tr name="608" id="608">
+<td>608</td><td><span class="ct">  * @{</span></td></tr>
+<tr name="609" id="609">
+<td>609</td><td><span class="ct">  */</span></td></tr>
+<tr name="610" id="610">
+<td>610</td><td></td></tr>
+<tr name="611" id="611">
+<td>611</td><td><span class="ct">/**</span></td></tr>
+<tr name="612" id="612">
+<td>612</td><td><span class="ct">  * @brief  Writes the number of data units to be transferred on the DMAy Streamx.</span></td></tr>
+<tr name="613" id="613">
+<td>613</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="614" id="614">
+<td>614</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="615" id="615">
+<td>615</td><td><span class="ct">  * @param  Counter: Number of data units to be transferred (from 0 to 65535) </span></td></tr>
+<tr name="616" id="616">
+<td>616</td><td><span class="ct">  *          Number of data items depends only on the Peripheral data format.</span></td></tr>
+<tr name="617" id="617">
+<td>617</td><td><span class="ct">  *            </span></td></tr>
+<tr name="618" id="618">
+<td>618</td><td><span class="ct">  * @note   If Peripheral data format is Bytes: number of data units is equal </span></td></tr>
+<tr name="619" id="619">
+<td>619</td><td><span class="ct">  *         to total number of bytes to be transferred.</span></td></tr>
+<tr name="620" id="620">
+<td>620</td><td><span class="ct">  *           </span></td></tr>
+<tr name="621" id="621">
+<td>621</td><td><span class="ct">  * @note   If Peripheral data format is Half-Word: number of data units is  </span></td></tr>
+<tr name="622" id="622">
+<td>622</td><td><span class="ct">  *         equal to total number of bytes to be transferred / 2.</span></td></tr>
+<tr name="623" id="623">
+<td>623</td><td><span class="ct">  *           </span></td></tr>
+<tr name="624" id="624">
+<td>624</td><td><span class="ct">  * @note   If Peripheral data format is Word: number of data units is equal </span></td></tr>
+<tr name="625" id="625">
+<td>625</td><td><span class="ct">  *         to total  number of bytes to be transferred / 4.</span></td></tr>
+<tr name="626" id="626">
+<td>626</td><td><span class="ct">  *      </span></td></tr>
+<tr name="627" id="627">
+<td>627</td><td><span class="ct">  * @note   In Memory-to-Memory transfer mode, the memory buffer pointed by </span></td></tr>
+<tr name="628" id="628">
+<td>628</td><td><span class="ct">  *         DMAy_SxPAR register is considered as Peripheral.</span></td></tr>
+<tr name="629" id="629">
+<td>629</td><td><span class="ct">  *      </span></td></tr>
+<tr name="630" id="630">
+<td>630</td><td><span class="ct">  * @retval The number of remaining data units in the current DMAy Streamx transfer.</span></td></tr>
+<tr name="631" id="631">
+<td>631</td><td><span class="ct">  */</span></td></tr>
+<tr name="632" id="632">
+<td>632</td><td><span class="kw">void</span> <a id="632c6" class="tk">DMA_SetCurrDataCounter</a>(<a id="632c29" class="tk">DMA_Stream_TypeDef</a><a id="632c47" class="tk">*</a> <a id="632c49" class="tk">DMAy_Streamx</a>, <a id="632c63" class="tk">uint16_t</a> <a id="632c72" class="tk">Counter</a>)</td></tr>
+<tr name="633" id="633">
+<td>633</td><td><span class="br">{</span></td></tr>
+<tr name="634" id="634">
+<td>634</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="635" id="635">
+<td>635</td><td>  <a id="635c3" class="tk">assert_param</a>(<a id="635c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="635c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="636" id="636">
+<td>636</td><td></td></tr>
+<tr name="637" id="637">
+<td>637</td><td>  <span class="ct">/* Write the number of data units to be transferred */</span></td></tr>
+<tr name="638" id="638">
+<td>638</td><td>  <a id="638c3" class="tk">DMAy_Streamx</a>-&gt;<a id="638c17" class="tk">NDTR</a> = (<a id="638c25" class="tk">uint16_t</a>)<a id="638c34" class="tk">Counter</a>;</td></tr>
+<tr name="639" id="639">
+<td>639</td><td><span class="br">}</span></td></tr>
+<tr name="640" id="640">
+<td>640</td><td></td></tr>
+<tr name="641" id="641">
+<td>641</td><td><span class="ct">/**</span></td></tr>
+<tr name="642" id="642">
+<td>642</td><td><span class="ct">  * @brief  Returns the number of remaining data units in the current DMAy Streamx transfer.</span></td></tr>
+<tr name="643" id="643">
+<td>643</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="644" id="644">
+<td>644</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="645" id="645">
+<td>645</td><td><span class="ct">  * @retval The number of remaining data units in the current DMAy Streamx transfer.</span></td></tr>
+<tr name="646" id="646">
+<td>646</td><td><span class="ct">  */</span></td></tr>
+<tr name="647" id="647">
+<td>647</td><td><a id="647c1" class="tk">uint16_t</a> <a id="647c10" class="tk">DMA_GetCurrDataCounter</a>(<a id="647c33" class="tk">DMA_Stream_TypeDef</a><a id="647c51" class="tk">*</a> <a id="647c53" class="tk">DMAy_Streamx</a>)</td></tr>
+<tr name="648" id="648">
+<td>648</td><td><span class="br">{</span></td></tr>
+<tr name="649" id="649">
+<td>649</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="650" id="650">
+<td>650</td><td>  <a id="650c3" class="tk">assert_param</a>(<a id="650c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="650c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="651" id="651">
+<td>651</td><td></td></tr>
+<tr name="652" id="652">
+<td>652</td><td>  <span class="ct">/* Return the number of remaining data units for DMAy Streamx */</span></td></tr>
+<tr name="653" id="653">
+<td>653</td><td>  <span class="kw">return</span> ((<a id="653c12" class="tk">uint16_t</a>)(<a id="653c22" class="tk">DMAy_Streamx</a>-&gt;<a id="653c36" class="tk">NDTR</a>));</td></tr>
+<tr name="654" id="654">
+<td>654</td><td><span class="br">}</span></td></tr>
+<tr name="655" id="655">
+<td>655</td><td><span class="ct">/**</span></td></tr>
+<tr name="656" id="656">
+<td>656</td><td><span class="ct">  * @}</span></td></tr>
+<tr name="657" id="657">
+<td>657</td><td><span class="ct">  */</span></td></tr>
+<tr name="658" id="658">
+<td>658</td><td></td></tr>
+<tr name="659" id="659">
+<td>659</td><td><span class="ct">/** @defgroup DMA_Group3 Double Buffer mode functions</span></td></tr>
+<tr name="660" id="660">
+<td>660</td><td><span class="ct"> *  @brief   Double Buffer mode functions </span></td></tr>
+<tr name="661" id="661">
+<td>661</td><td><span class="ct"> *</span></td></tr>
+<tr name="662" id="662">
+<td>662</td><td><span class="ct">@verbatim   </span></td></tr>
+<tr name="663" id="663">
+<td>663</td><td><span class="ct"> ===============================================================================</span></td></tr>
+<tr name="664" id="664">
+<td>664</td><td><span class="ct">                    ##### Double Buffer mode functions #####</span></td></tr>
+<tr name="665" id="665">
+<td>665</td><td><span class="ct"> ===============================================================================  </span></td></tr>
+<tr name="666" id="666">
+<td>666</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="667" id="667">
+<td>667</td><td><span class="ct">    This subsection provides function allowing to configure and control the double </span></td></tr>
+<tr name="668" id="668">
+<td>668</td><td><span class="ct">    buffer mode parameters.</span></td></tr>
+<tr name="669" id="669">
+<td>669</td><td><span class="ct">    </span></td></tr>
+<tr name="670" id="670">
+<td>670</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="671" id="671">
+<td>671</td><td><span class="ct">    The Double Buffer mode can be used only when Circular mode is enabled.</span></td></tr>
+<tr name="672" id="672">
+<td>672</td><td><span class="ct">    The Double Buffer mode cannot be used when transferring data from Memory to Memory.</span></td></tr>
+<tr name="673" id="673">
+<td>673</td><td><span class="ct">    </span></td></tr>
+<tr name="674" id="674">
+<td>674</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="675" id="675">
+<td>675</td><td><span class="ct">    The Double Buffer mode allows to set two different Memory addresses from/to which</span></td></tr>
+<tr name="676" id="676">
+<td>676</td><td><span class="ct">    the DMA controller will access alternatively (after completing transfer to/from </span></td></tr>
+<tr name="677" id="677">
+<td>677</td><td><span class="ct">    target memory 0, it will start transfer to/from target memory 1).</span></td></tr>
+<tr name="678" id="678">
+<td>678</td><td><span class="ct">    This allows to reduce software overhead for double buffering and reduce the CPU</span></td></tr>
+<tr name="679" id="679">
+<td>679</td><td><span class="ct">    access time.</span></td></tr>
+<tr name="680" id="680">
+<td>680</td><td><span class="ct">    </span></td></tr>
+<tr name="681" id="681">
+<td>681</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="682" id="682">
+<td>682</td><td><span class="ct">    Two functions must be called before calling the DMA_Init() function:</span></td></tr>
+<tr name="683" id="683">
+<td>683</td><td><span class="ct">      (+) void DMA_DoubleBufferModeConfig(DMA_Stream_TypeDef* DMAy_Streamx, </span></td></tr>
+<tr name="684" id="684">
+<td>684</td><td><span class="ct">          uint32_t Memory1BaseAddr, uint32_t DMA_CurrentMemory);</span></td></tr>
+<tr name="685" id="685">
+<td>685</td><td><span class="ct">      (+) void DMA_DoubleBufferModeCmd(DMA_Stream_TypeDef* DMAy_Streamx, FunctionalState NewState);</span></td></tr>
+<tr name="686" id="686">
+<td>686</td><td><span class="ct">      </span></td></tr>
+<tr name="687" id="687">
+<td>687</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="688" id="688">
+<td>688</td><td><span class="ct">    DMA_DoubleBufferModeConfig() is called to configure the Memory 1 base address </span></td></tr>
+<tr name="689" id="689">
+<td>689</td><td><span class="ct">    and the first Memory target from/to which the transfer will start after </span></td></tr>
+<tr name="690" id="690">
+<td>690</td><td><span class="ct">    enabling the DMA Stream. Then DMA_DoubleBufferModeCmd() must be called </span></td></tr>
+<tr name="691" id="691">
+<td>691</td><td><span class="ct">    to enable the Double Buffer mode (or disable it when it should not be used).</span></td></tr>
+<tr name="692" id="692">
+<td>692</td><td><span class="ct">  </span></td></tr>
+<tr name="693" id="693">
+<td>693</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="694" id="694">
+<td>694</td><td><span class="ct">    Two functions can be called dynamically when the transfer is ongoing (or when the DMA Stream is </span></td></tr>
+<tr name="695" id="695">
+<td>695</td><td><span class="ct">    stopped) to modify on of the target Memories addresses or to check which Memory target is currently</span></td></tr>
+<tr name="696" id="696">
+<td>696</td><td><span class="ct">    used:</span></td></tr>
+<tr name="697" id="697">
+<td>697</td><td><span class="ct">      (+) void DMA_MemoryTargetConfig(DMA_Stream_TypeDef* DMAy_Streamx, </span></td></tr>
+<tr name="698" id="698">
+<td>698</td><td><span class="ct">                uint32_t MemoryBaseAddr, uint32_t DMA_MemoryTarget);</span></td></tr>
+<tr name="699" id="699">
+<td>699</td><td><span class="ct">      (+) uint32_t DMA_GetCurrentMemoryTarget(DMA_Stream_TypeDef* DMAy_Streamx);</span></td></tr>
+<tr name="700" id="700">
+<td>700</td><td><span class="ct">      </span></td></tr>
+<tr name="701" id="701">
+<td>701</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="702" id="702">
+<td>702</td><td><span class="ct">    DMA_MemoryTargetConfig() can be called to modify the base address of one of </span></td></tr>
+<tr name="703" id="703">
+<td>703</td><td><span class="ct">    the two target Memories.</span></td></tr>
+<tr name="704" id="704">
+<td>704</td><td><span class="ct">    The Memory of which the base address will be modified must not be currently </span></td></tr>
+<tr name="705" id="705">
+<td>705</td><td><span class="ct">    be used by the DMA Stream (ie. if the DMA Stream is currently transferring </span></td></tr>
+<tr name="706" id="706">
+<td>706</td><td><span class="ct">    from Memory 1 then you can only modify base address of target Memory 0 and vice versa).</span></td></tr>
+<tr name="707" id="707">
+<td>707</td><td><span class="ct">    To check this condition, it is recommended to use the function DMA_GetCurrentMemoryTarget() which</span></td></tr>
+<tr name="708" id="708">
+<td>708</td><td><span class="ct">    returns the index of the Memory target currently in use by the DMA Stream.</span></td></tr>
+<tr name="709" id="709">
+<td>709</td><td><span class="ct"></span></td></tr>
+<tr name="710" id="710">
+<td>710</td><td><span class="ct">@endverbatim</span></td></tr>
+<tr name="711" id="711">
+<td>711</td><td><span class="ct">  * @{</span></td></tr>
+<tr name="712" id="712">
+<td>712</td><td><span class="ct">  */</span></td></tr>
+<tr name="713" id="713">
+<td>713</td><td>  </td></tr>
+<tr name="714" id="714">
+<td>714</td><td><span class="ct">/**</span></td></tr>
+<tr name="715" id="715">
+<td>715</td><td><span class="ct">  * @brief  Configures, when the DMAy Streamx is disabled, the double buffer mode </span></td></tr>
+<tr name="716" id="716">
+<td>716</td><td><span class="ct">  *         and the current memory target.</span></td></tr>
+<tr name="717" id="717">
+<td>717</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="718" id="718">
+<td>718</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="719" id="719">
+<td>719</td><td><span class="ct">  * @param  Memory1BaseAddr: the base address of the second buffer (Memory 1)  </span></td></tr>
+<tr name="720" id="720">
+<td>720</td><td><span class="ct">  * @param  DMA_CurrentMemory: specifies which memory will be first buffer for</span></td></tr>
+<tr name="721" id="721">
+<td>721</td><td><span class="ct">  *         the transactions when the Stream will be enabled. </span></td></tr>
+<tr name="722" id="722">
+<td>722</td><td><span class="ct">  *          This parameter can be one of the following values:</span></td></tr>
+<tr name="723" id="723">
+<td>723</td><td><span class="ct">  *            @arg DMA_Memory_0: Memory 0 is the current buffer.</span></td></tr>
+<tr name="724" id="724">
+<td>724</td><td><span class="ct">  *            @arg DMA_Memory_1: Memory 1 is the current buffer.  </span></td></tr>
+<tr name="725" id="725">
+<td>725</td><td><span class="ct">  *       </span></td></tr>
+<tr name="726" id="726">
+<td>726</td><td><span class="ct">  * @note   Memory0BaseAddr is set by the DMA structure configuration in DMA_Init().</span></td></tr>
+<tr name="727" id="727">
+<td>727</td><td><span class="ct">  *   </span></td></tr>
+<tr name="728" id="728">
+<td>728</td><td><span class="ct">  * @retval None</span></td></tr>
+<tr name="729" id="729">
+<td>729</td><td><span class="ct">  */</span></td></tr>
+<tr name="730" id="730">
+<td>730</td><td><span class="kw">void</span> <a id="730c6" class="tk">DMA_DoubleBufferModeConfig</a>(<a id="730c33" class="tk">DMA_Stream_TypeDef</a><a id="730c51" class="tk">*</a> <a id="730c53" class="tk">DMAy_Streamx</a>, <a id="730c67" class="tk">uint32_t</a> <a id="730c76" class="tk">Memory1BaseAddr</a>,</td></tr>
+<tr name="731" id="731">
+<td>731</td><td>                                <a id="731c33" class="tk">uint32_t</a> <a id="731c42" class="tk">DMA_CurrentMemory</a>)</td></tr>
+<tr name="732" id="732">
+<td>732</td><td><span class="br">{</span>  </td></tr>
+<tr name="733" id="733">
+<td>733</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="734" id="734">
+<td>734</td><td>  <a id="734c3" class="tk">assert_param</a>(<a id="734c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="734c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="735" id="735">
+<td>735</td><td>  <a id="735c3" class="tk">assert_param</a>(<a id="735c16" class="tk">IS_DMA_CURRENT_MEM</a>(<a id="735c35" class="tk">DMA_CurrentMemory</a>));</td></tr>
+<tr name="736" id="736">
+<td>736</td><td></td></tr>
+<tr name="737" id="737">
+<td>737</td><td>  <span class="kw">if</span> (<a id="737c7" class="tk">DMA_CurrentMemory</a> <a id="737c25" class="tk">!=</a> <a id="737c28" class="tk">DMA_Memory_0</a>)</td></tr>
+<tr name="738" id="738">
+<td>738</td><td>  <span class="br">{</span></td></tr>
+<tr name="739" id="739">
+<td>739</td><td>    <span class="ct">/* Set Memory 1 as current memory address */</span></td></tr>
+<tr name="740" id="740">
+<td>740</td><td>    <a id="740c5" class="tk">DMAy_Streamx</a>-&gt;<a id="740c19" class="tk">CR</a> <a id="740c22" class="tk">|=</a> (<a id="740c26" class="tk">uint32_t</a>)(<a id="740c36" class="tk">DMA_SxCR_CT</a>);    </td></tr>
+<tr name="741" id="741">
+<td>741</td><td>  <span class="br">}</span></td></tr>
+<tr name="742" id="742">
+<td>742</td><td>  <span class="kw">else</span></td></tr>
+<tr name="743" id="743">
+<td>743</td><td>  <span class="br">{</span></td></tr>
+<tr name="744" id="744">
+<td>744</td><td>    <span class="ct">/* Set Memory 0 as current memory address */</span></td></tr>
+<tr name="745" id="745">
+<td>745</td><td>    <a id="745c5" class="tk">DMAy_Streamx</a>-&gt;<a id="745c19" class="tk">CR</a> <a id="745c22" class="tk">&amp;=</a> <a id="745c25" class="tk">~</a>(<a id="745c27" class="tk">uint32_t</a>)(<a id="745c37" class="tk">DMA_SxCR_CT</a>);    </td></tr>
+<tr name="746" id="746">
+<td>746</td><td>  <span class="br">}</span></td></tr>
+<tr name="747" id="747">
+<td>747</td><td></td></tr>
+<tr name="748" id="748">
+<td>748</td><td>  <span class="ct">/* Write to DMAy Streamx M1AR */</span></td></tr>
+<tr name="749" id="749">
+<td>749</td><td>  <a id="749c3" class="tk">DMAy_Streamx</a>-&gt;<a id="749c17" class="tk">M1AR</a> = <a id="749c24" class="tk">Memory1BaseAddr</a>;</td></tr>
+<tr name="750" id="750">
+<td>750</td><td><span class="br">}</span></td></tr>
+<tr name="751" id="751">
+<td>751</td><td></td></tr>
+<tr name="752" id="752">
+<td>752</td><td><span class="ct">/**</span></td></tr>
+<tr name="753" id="753">
+<td>753</td><td><span class="ct">  * @brief  Enables or disables the double buffer mode for the selected DMA stream.</span></td></tr>
+<tr name="754" id="754">
+<td>754</td><td><span class="ct">  * @note   This function can be called only when the DMA Stream is disabled.  </span></td></tr>
+<tr name="755" id="755">
+<td>755</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="756" id="756">
+<td>756</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="757" id="757">
+<td>757</td><td><span class="ct">  * @param  NewState: new state of the DMAy Streamx double buffer mode. </span></td></tr>
+<tr name="758" id="758">
+<td>758</td><td><span class="ct">  *          This parameter can be: ENABLE or DISABLE.</span></td></tr>
+<tr name="759" id="759">
+<td>759</td><td><span class="ct">  * @retval None</span></td></tr>
+<tr name="760" id="760">
+<td>760</td><td><span class="ct">  */</span></td></tr>
+<tr name="761" id="761">
+<td>761</td><td><span class="kw">void</span> <a id="761c6" class="tk">DMA_DoubleBufferModeCmd</a>(<a id="761c30" class="tk">DMA_Stream_TypeDef</a><a id="761c48" class="tk">*</a> <a id="761c50" class="tk">DMAy_Streamx</a>, <a id="761c64" class="tk">FunctionalState</a> <a id="761c80" class="tk">NewState</a>)</td></tr>
+<tr name="762" id="762">
+<td>762</td><td><span class="br">{</span>  </td></tr>
+<tr name="763" id="763">
+<td>763</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="764" id="764">
+<td>764</td><td>  <a id="764c3" class="tk">assert_param</a>(<a id="764c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="764c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="765" id="765">
+<td>765</td><td>  <a id="765c3" class="tk">assert_param</a>(<a id="765c16" class="tk">IS_FUNCTIONAL_STATE</a>(<a id="765c36" class="tk">NewState</a>));</td></tr>
+<tr name="766" id="766">
+<td>766</td><td></td></tr>
+<tr name="767" id="767">
+<td>767</td><td>  <span class="ct">/* Configure the Double Buffer mode */</span></td></tr>
+<tr name="768" id="768">
+<td>768</td><td>  <span class="kw">if</span> (<a id="768c7" class="tk">NewState</a> <a id="768c16" class="tk">!=</a> <a id="768c19" class="tk">DISABLE</a>)</td></tr>
+<tr name="769" id="769">
+<td>769</td><td>  <span class="br">{</span></td></tr>
+<tr name="770" id="770">
+<td>770</td><td>    <span class="ct">/* Enable the Double buffer mode */</span></td></tr>
+<tr name="771" id="771">
+<td>771</td><td>    <a id="771c5" class="tk">DMAy_Streamx</a>-&gt;<a id="771c19" class="tk">CR</a> <a id="771c22" class="tk">|=</a> (<a id="771c26" class="tk">uint32_t</a>)<a id="771c35" class="tk">DMA_SxCR_DBM</a>;</td></tr>
+<tr name="772" id="772">
+<td>772</td><td>  <span class="br">}</span></td></tr>
+<tr name="773" id="773">
+<td>773</td><td>  <span class="kw">else</span></td></tr>
+<tr name="774" id="774">
+<td>774</td><td>  <span class="br">{</span></td></tr>
+<tr name="775" id="775">
+<td>775</td><td>    <span class="ct">/* Disable the Double buffer mode */</span></td></tr>
+<tr name="776" id="776">
+<td>776</td><td>    <a id="776c5" class="tk">DMAy_Streamx</a>-&gt;<a id="776c19" class="tk">CR</a> <a id="776c22" class="tk">&amp;=</a> <a id="776c25" class="tk">~</a>(<a id="776c27" class="tk">uint32_t</a>)<a id="776c36" class="tk">DMA_SxCR_DBM</a>;</td></tr>
+<tr name="777" id="777">
+<td>777</td><td>  <span class="br">}</span></td></tr>
+<tr name="778" id="778">
+<td>778</td><td><span class="br">}</span></td></tr>
+<tr name="779" id="779">
+<td>779</td><td></td></tr>
+<tr name="780" id="780">
+<td>780</td><td><span class="ct">/**</span></td></tr>
+<tr name="781" id="781">
+<td>781</td><td><span class="ct">  * @brief  Configures the Memory address for the next buffer transfer in double</span></td></tr>
+<tr name="782" id="782">
+<td>782</td><td><span class="ct">  *         buffer mode (for dynamic use). This function can be called when the</span></td></tr>
+<tr name="783" id="783">
+<td>783</td><td><span class="ct">  *         DMA Stream is enabled and when the transfer is ongoing.  </span></td></tr>
+<tr name="784" id="784">
+<td>784</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="785" id="785">
+<td>785</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="786" id="786">
+<td>786</td><td><span class="ct">  * @param  MemoryBaseAddr: The base address of the target memory buffer</span></td></tr>
+<tr name="787" id="787">
+<td>787</td><td><span class="ct">  * @param  DMA_MemoryTarget: Next memory target to be used. </span></td></tr>
+<tr name="788" id="788">
+<td>788</td><td><span class="ct">  *         This parameter can be one of the following values:</span></td></tr>
+<tr name="789" id="789">
+<td>789</td><td><span class="ct">  *            @arg DMA_Memory_0: To use the memory address 0</span></td></tr>
+<tr name="790" id="790">
+<td>790</td><td><span class="ct">  *            @arg DMA_Memory_1: To use the memory address 1</span></td></tr>
+<tr name="791" id="791">
+<td>791</td><td><span class="ct">  * </span></td></tr>
+<tr name="792" id="792">
+<td>792</td><td><span class="ct">  * @note    It is not allowed to modify the Base Address of a target Memory when</span></td></tr>
+<tr name="793" id="793">
+<td>793</td><td><span class="ct">  *          this target is involved in the current transfer. ie. If the DMA Stream</span></td></tr>
+<tr name="794" id="794">
+<td>794</td><td><span class="ct">  *          is currently transferring to/from Memory 1, then it not possible to</span></td></tr>
+<tr name="795" id="795">
+<td>795</td><td><span class="ct">  *          modify Base address of Memory 1, but it is possible to modify Base</span></td></tr>
+<tr name="796" id="796">
+<td>796</td><td><span class="ct">  *          address of Memory 0.</span></td></tr>
+<tr name="797" id="797">
+<td>797</td><td><span class="ct">  *          To know which Memory is currently used, you can use the function</span></td></tr>
+<tr name="798" id="798">
+<td>798</td><td><span class="ct">  *          DMA_GetCurrentMemoryTarget().             </span></td></tr>
+<tr name="799" id="799">
+<td>799</td><td><span class="ct">  *  </span></td></tr>
+<tr name="800" id="800">
+<td>800</td><td><span class="ct">  * @retval None</span></td></tr>
+<tr name="801" id="801">
+<td>801</td><td><span class="ct">  */</span></td></tr>
+<tr name="802" id="802">
+<td>802</td><td><span class="kw">void</span> <a id="802c6" class="tk">DMA_MemoryTargetConfig</a>(<a id="802c29" class="tk">DMA_Stream_TypeDef</a><a id="802c47" class="tk">*</a> <a id="802c49" class="tk">DMAy_Streamx</a>, <a id="802c63" class="tk">uint32_t</a> <a id="802c72" class="tk">MemoryBaseAddr</a>,</td></tr>
+<tr name="803" id="803">
+<td>803</td><td>                           <a id="803c28" class="tk">uint32_t</a> <a id="803c37" class="tk">DMA_MemoryTarget</a>)</td></tr>
+<tr name="804" id="804">
+<td>804</td><td><span class="br">{</span></td></tr>
+<tr name="805" id="805">
+<td>805</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="806" id="806">
+<td>806</td><td>  <a id="806c3" class="tk">assert_param</a>(<a id="806c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="806c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="807" id="807">
+<td>807</td><td>  <a id="807c3" class="tk">assert_param</a>(<a id="807c16" class="tk">IS_DMA_CURRENT_MEM</a>(<a id="807c35" class="tk">DMA_MemoryTarget</a>));</td></tr>
+<tr name="808" id="808">
+<td>808</td><td>    </td></tr>
+<tr name="809" id="809">
+<td>809</td><td>  <span class="ct">/* Check the Memory target to be configured */</span></td></tr>
+<tr name="810" id="810">
+<td>810</td><td>  <span class="kw">if</span> (<a id="810c7" class="tk">DMA_MemoryTarget</a> <a id="810c24" class="tk">!=</a> <a id="810c27" class="tk">DMA_Memory_0</a>)</td></tr>
+<tr name="811" id="811">
+<td>811</td><td>  <span class="br">{</span></td></tr>
+<tr name="812" id="812">
+<td>812</td><td>    <span class="ct">/* Write to DMAy Streamx M1AR */</span></td></tr>
+<tr name="813" id="813">
+<td>813</td><td>    <a id="813c5" class="tk">DMAy_Streamx</a>-&gt;<a id="813c19" class="tk">M1AR</a> = <a id="813c26" class="tk">MemoryBaseAddr</a>;    </td></tr>
+<tr name="814" id="814">
+<td>814</td><td>  <span class="br">}</span>  </td></tr>
+<tr name="815" id="815">
+<td>815</td><td>  <span class="kw">else</span></td></tr>
+<tr name="816" id="816">
+<td>816</td><td>  <span class="br">{</span></td></tr>
+<tr name="817" id="817">
+<td>817</td><td>    <span class="ct">/* Write to DMAy Streamx M0AR */</span></td></tr>
+<tr name="818" id="818">
+<td>818</td><td>    <a id="818c5" class="tk">DMAy_Streamx</a>-&gt;<a id="818c19" class="tk">M0AR</a> = <a id="818c26" class="tk">MemoryBaseAddr</a>;  </td></tr>
+<tr name="819" id="819">
+<td>819</td><td>  <span class="br">}</span></td></tr>
+<tr name="820" id="820">
+<td>820</td><td><span class="br">}</span></td></tr>
+<tr name="821" id="821">
+<td>821</td><td></td></tr>
+<tr name="822" id="822">
+<td>822</td><td><span class="ct">/**</span></td></tr>
+<tr name="823" id="823">
+<td>823</td><td><span class="ct">  * @brief  Returns the current memory target used by double buffer transfer.</span></td></tr>
+<tr name="824" id="824">
+<td>824</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="825" id="825">
+<td>825</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="826" id="826">
+<td>826</td><td><span class="ct">  * @retval The memory target number: 0 for Memory0 or 1 for Memory1. </span></td></tr>
+<tr name="827" id="827">
+<td>827</td><td><span class="ct">  */</span></td></tr>
+<tr name="828" id="828">
+<td>828</td><td><a id="828c1" class="tk">uint32_t</a> <a id="828c10" class="tk">DMA_GetCurrentMemoryTarget</a>(<a id="828c37" class="tk">DMA_Stream_TypeDef</a><a id="828c55" class="tk">*</a> <a id="828c57" class="tk">DMAy_Streamx</a>)</td></tr>
+<tr name="829" id="829">
+<td>829</td><td><span class="br">{</span></td></tr>
+<tr name="830" id="830">
+<td>830</td><td>  <a id="830c3" class="tk">uint32_t</a> <a id="830c12" class="tk">tmp</a> = 0;</td></tr>
+<tr name="831" id="831">
+<td>831</td><td>  </td></tr>
+<tr name="832" id="832">
+<td>832</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="833" id="833">
+<td>833</td><td>  <a id="833c3" class="tk">assert_param</a>(<a id="833c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="833c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="834" id="834">
+<td>834</td><td></td></tr>
+<tr name="835" id="835">
+<td>835</td><td>  <span class="ct">/* Get the current memory target */</span></td></tr>
+<tr name="836" id="836">
+<td>836</td><td>  <span class="kw">if</span> ((<a id="836c8" class="tk">DMAy_Streamx</a>-&gt;<a id="836c22" class="tk">CR</a> <a id="836c25" class="tk">&amp;</a> <a id="836c27" class="tk">DMA_SxCR_CT</a>) <a id="836c40" class="tk">!=</a> 0)</td></tr>
+<tr name="837" id="837">
+<td>837</td><td>  <span class="br">{</span></td></tr>
+<tr name="838" id="838">
+<td>838</td><td>    <span class="ct">/* Current memory buffer used is Memory 1 */</span></td></tr>
+<tr name="839" id="839">
+<td>839</td><td>    <a id="839c5" class="tk">tmp</a> = 1;</td></tr>
+<tr name="840" id="840">
+<td>840</td><td>  <span class="br">}</span>  </td></tr>
+<tr name="841" id="841">
+<td>841</td><td>  <span class="kw">else</span></td></tr>
+<tr name="842" id="842">
+<td>842</td><td>  <span class="br">{</span></td></tr>
+<tr name="843" id="843">
+<td>843</td><td>    <span class="ct">/* Current memory buffer used is Memory 0 */</span></td></tr>
+<tr name="844" id="844">
+<td>844</td><td>    <a id="844c5" class="tk">tmp</a> = 0;    </td></tr>
+<tr name="845" id="845">
+<td>845</td><td>  <span class="br">}</span></td></tr>
+<tr name="846" id="846">
+<td>846</td><td>  <span class="kw">return</span> <a id="846c10" class="tk">tmp</a>;</td></tr>
+<tr name="847" id="847">
+<td>847</td><td><span class="br">}</span></td></tr>
+<tr name="848" id="848">
+<td>848</td><td><span class="ct">/**</span></td></tr>
+<tr name="849" id="849">
+<td>849</td><td><span class="ct">  * @}</span></td></tr>
+<tr name="850" id="850">
+<td>850</td><td><span class="ct">  */</span></td></tr>
+<tr name="851" id="851">
+<td>851</td><td></td></tr>
+<tr name="852" id="852">
+<td>852</td><td><span class="ct">/** @defgroup DMA_Group4 Interrupts and flags management functions</span></td></tr>
+<tr name="853" id="853">
+<td>853</td><td><span class="ct"> *  @brief   Interrupts and flags management functions </span></td></tr>
+<tr name="854" id="854">
+<td>854</td><td><span class="ct"> *</span></td></tr>
+<tr name="855" id="855">
+<td>855</td><td><span class="ct">@verbatim   </span></td></tr>
+<tr name="856" id="856">
+<td>856</td><td><span class="ct"> ===============================================================================</span></td></tr>
+<tr name="857" id="857">
+<td>857</td><td><span class="ct">              ##### Interrupts and flags management functions #####</span></td></tr>
+<tr name="858" id="858">
+<td>858</td><td><span class="ct"> ===============================================================================  </span></td></tr>
+<tr name="859" id="859">
+<td>859</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="860" id="860">
+<td>860</td><td><span class="ct">    This subsection provides functions allowing to</span></td></tr>
+<tr name="861" id="861">
+<td>861</td><td><span class="ct">      (+) Check the DMA enable status</span></td></tr>
+<tr name="862" id="862">
+<td>862</td><td><span class="ct">      (+) Check the FIFO status </span></td></tr>
+<tr name="863" id="863">
+<td>863</td><td><span class="ct">      (+) Configure the DMA Interrupts sources and check or clear the flags or </span></td></tr>
+<tr name="864" id="864">
+<td>864</td><td><span class="ct">          pending bits status.  </span></td></tr>
+<tr name="865" id="865">
+<td>865</td><td><span class="ct">           </span></td></tr>
+<tr name="866" id="866">
+<td>866</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="867" id="867">
+<td>867</td><td><span class="ct">      (#) DMA Enable status:</span></td></tr>
+<tr name="868" id="868">
+<td>868</td><td><span class="ct">          After configuring the DMA Stream (DMA_Init() function) and enabling </span></td></tr>
+<tr name="869" id="869">
+<td>869</td><td><span class="ct">          the stream, it is recommended to check (or wait until) the DMA Stream </span></td></tr>
+<tr name="870" id="870">
+<td>870</td><td><span class="ct">          is effectively enabled. A Stream may remain disabled if a configuration </span></td></tr>
+<tr name="871" id="871">
+<td>871</td><td><span class="ct">          parameter is wrong. After disabling a DMA Stream, it is also recommended </span></td></tr>
+<tr name="872" id="872">
+<td>872</td><td><span class="ct">          to check (or wait until) the DMA Stream is effectively disabled. </span></td></tr>
+<tr name="873" id="873">
+<td>873</td><td><span class="ct">          If a Stream is disabled while a data transfer is ongoing, the current </span></td></tr>
+<tr name="874" id="874">
+<td>874</td><td><span class="ct">          data will be transferred and the Stream will be effectively disabled </span></td></tr>
+<tr name="875" id="875">
+<td>875</td><td><span class="ct">          only after this data transfer completion.</span></td></tr>
+<tr name="876" id="876">
+<td>876</td><td><span class="ct">          To monitor this state it is possible to use the following function:</span></td></tr>
+<tr name="877" id="877">
+<td>877</td><td><span class="ct">        (++) FunctionalState DMA_GetCmdStatus(DMA_Stream_TypeDef* DMAy_Streamx); </span></td></tr>
+<tr name="878" id="878">
+<td>878</td><td><span class="ct"> </span></td></tr>
+<tr name="879" id="879">
+<td>879</td><td><span class="ct">      (#) FIFO Status:</span></td></tr>
+<tr name="880" id="880">
+<td>880</td><td><span class="ct">          It is possible to monitor the FIFO status when a transfer is ongoing </span></td></tr>
+<tr name="881" id="881">
+<td>881</td><td><span class="ct">          using the following function:</span></td></tr>
+<tr name="882" id="882">
+<td>882</td><td><span class="ct">        (++) uint32_t DMA_GetFIFOStatus(DMA_Stream_TypeDef* DMAy_Streamx); </span></td></tr>
+<tr name="883" id="883">
+<td>883</td><td><span class="ct"> </span></td></tr>
+<tr name="884" id="884">
+<td>884</td><td><span class="ct">      (#) DMA Interrupts and Flags:</span></td></tr>
+<tr name="885" id="885">
+<td>885</td><td><span class="ct">          The user should identify which mode will be used in his application </span></td></tr>
+<tr name="886" id="886">
+<td>886</td><td><span class="ct">          to manage the DMA controller events: Polling mode or Interrupt mode. </span></td></tr>
+<tr name="887" id="887">
+<td>887</td><td><span class="ct">    </span></td></tr>
+<tr name="888" id="888">
+<td>888</td><td><span class="ct">    *** Polling Mode ***</span></td></tr>
+<tr name="889" id="889">
+<td>889</td><td><span class="ct">    ====================</span></td></tr>
+<tr name="890" id="890">
+<td>890</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="891" id="891">
+<td>891</td><td><span class="ct">    Each DMA stream can be managed through 4 event Flags:</span></td></tr>
+<tr name="892" id="892">
+<td>892</td><td><span class="ct">    (x : DMA Stream number )</span></td></tr>
+<tr name="893" id="893">
+<td>893</td><td><span class="ct">      (#) DMA_FLAG_FEIFx  : to indicate that a FIFO Mode Transfer Error event occurred.</span></td></tr>
+<tr name="894" id="894">
+<td>894</td><td><span class="ct">      (#) DMA_FLAG_DMEIFx : to indicate that a Direct Mode Transfer Error event occurred.</span></td></tr>
+<tr name="895" id="895">
+<td>895</td><td><span class="ct">      (#) DMA_FLAG_TEIFx  : to indicate that a Transfer Error event occurred.</span></td></tr>
+<tr name="896" id="896">
+<td>896</td><td><span class="ct">      (#) DMA_FLAG_HTIFx  : to indicate that a Half-Transfer Complete event occurred.</span></td></tr>
+<tr name="897" id="897">
+<td>897</td><td><span class="ct">      (#) DMA_FLAG_TCIFx  : to indicate that a Transfer Complete event occurred .       </span></td></tr>
+<tr name="898" id="898">
+<td>898</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="899" id="899">
+<td>899</td><td><span class="ct">    In this Mode it is advised to use the following functions:</span></td></tr>
+<tr name="900" id="900">
+<td>900</td><td><span class="ct">      (+) FlagStatus DMA_GetFlagStatus(DMA_Stream_TypeDef* DMAy_Streamx, uint32_t DMA_FLAG);</span></td></tr>
+<tr name="901" id="901">
+<td>901</td><td><span class="ct">      (+) void DMA_ClearFlag(DMA_Stream_TypeDef* DMAy_Streamx, uint32_t DMA_FLAG);</span></td></tr>
+<tr name="902" id="902">
+<td>902</td><td><span class="ct"></span></td></tr>
+<tr name="903" id="903">
+<td>903</td><td><span class="ct">    *** Interrupt Mode ***</span></td></tr>
+<tr name="904" id="904">
+<td>904</td><td><span class="ct">    ======================</span></td></tr>
+<tr name="905" id="905">
+<td>905</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="906" id="906">
+<td>906</td><td><span class="ct">    Each DMA Stream can be managed through 4 Interrupts:</span></td></tr>
+<tr name="907" id="907">
+<td>907</td><td><span class="ct"></span></td></tr>
+<tr name="908" id="908">
+<td>908</td><td><span class="ct">    *** Interrupt Source ***</span></td></tr>
+<tr name="909" id="909">
+<td>909</td><td><span class="ct">    ========================</span></td></tr>
+<tr name="910" id="910">
+<td>910</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="911" id="911">
+<td>911</td><td><span class="ct">      (#) DMA_IT_FEIFx  : specifies the interrupt source for the  FIFO Mode Transfer Error event.</span></td></tr>
+<tr name="912" id="912">
+<td>912</td><td><span class="ct">      (#) DMA_IT_DMEIFx : specifies the interrupt source for the Direct Mode Transfer Error event.</span></td></tr>
+<tr name="913" id="913">
+<td>913</td><td><span class="ct">      (#) DMA_IT_TEIFx  : specifies the interrupt source for the Transfer Error event.</span></td></tr>
+<tr name="914" id="914">
+<td>914</td><td><span class="ct">      (#) DMA_IT_HTIFx  : specifies the interrupt source for the Half-Transfer Complete event.</span></td></tr>
+<tr name="915" id="915">
+<td>915</td><td><span class="ct">      (#) DMA_IT_TCIFx  : specifies the interrupt source for the a Transfer Complete event. </span></td></tr>
+<tr name="916" id="916">
+<td>916</td><td><span class="ct">    [..]</span></td></tr>
+<tr name="917" id="917">
+<td>917</td><td><span class="ct">    In this Mode it is advised to use the following functions:</span></td></tr>
+<tr name="918" id="918">
+<td>918</td><td><span class="ct">      (+) void DMA_ITConfig(DMA_Stream_TypeDef* DMAy_Streamx, uint32_t DMA_IT, FunctionalState NewState);</span></td></tr>
+<tr name="919" id="919">
+<td>919</td><td><span class="ct">      (+) ITStatus DMA_GetITStatus(DMA_Stream_TypeDef* DMAy_Streamx, uint32_t DMA_IT);</span></td></tr>
+<tr name="920" id="920">
+<td>920</td><td><span class="ct">      (+) void DMA_ClearITPendingBit(DMA_Stream_TypeDef* DMAy_Streamx, uint32_t DMA_IT);</span></td></tr>
+<tr name="921" id="921">
+<td>921</td><td><span class="ct"></span></td></tr>
+<tr name="922" id="922">
+<td>922</td><td><span class="ct">@endverbatim</span></td></tr>
+<tr name="923" id="923">
+<td>923</td><td><span class="ct">  * @{</span></td></tr>
+<tr name="924" id="924">
+<td>924</td><td><span class="ct">  */</span></td></tr>
+<tr name="925" id="925">
+<td>925</td><td></td></tr>
+<tr name="926" id="926">
+<td>926</td><td><span class="ct">/**</span></td></tr>
+<tr name="927" id="927">
+<td>927</td><td><span class="ct">  * @brief  Returns the status of EN bit for the specified DMAy Streamx.</span></td></tr>
+<tr name="928" id="928">
+<td>928</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="929" id="929">
+<td>929</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="930" id="930">
+<td>930</td><td><span class="ct">  *   </span></td></tr>
+<tr name="931" id="931">
+<td>931</td><td><span class="ct">  * @note    After configuring the DMA Stream (DMA_Init() function) and enabling</span></td></tr>
+<tr name="932" id="932">
+<td>932</td><td><span class="ct">  *          the stream, it is recommended to check (or wait until) the DMA Stream</span></td></tr>
+<tr name="933" id="933">
+<td>933</td><td><span class="ct">  *          is effectively enabled. A Stream may remain disabled if a configuration</span></td></tr>
+<tr name="934" id="934">
+<td>934</td><td><span class="ct">  *          parameter is wrong.</span></td></tr>
+<tr name="935" id="935">
+<td>935</td><td><span class="ct">  *          After disabling a DMA Stream, it is also recommended to check (or wait </span></td></tr>
+<tr name="936" id="936">
+<td>936</td><td><span class="ct">  *          until) the DMA Stream is effectively disabled. If a Stream is disabled</span></td></tr>
+<tr name="937" id="937">
+<td>937</td><td><span class="ct">  *          while a data transfer is ongoing, the current data will be transferred</span></td></tr>
+<tr name="938" id="938">
+<td>938</td><td><span class="ct">  *          and the Stream will be effectively disabled only after the transfer</span></td></tr>
+<tr name="939" id="939">
+<td>939</td><td><span class="ct">  *          of this single data is finished.  </span></td></tr>
+<tr name="940" id="940">
+<td>940</td><td><span class="ct">  *      </span></td></tr>
+<tr name="941" id="941">
+<td>941</td><td><span class="ct">  * @retval Current state of the DMAy Streamx (ENABLE or DISABLE).</span></td></tr>
+<tr name="942" id="942">
+<td>942</td><td><span class="ct">  */</span></td></tr>
+<tr name="943" id="943">
+<td>943</td><td><a id="943c1" class="tk">FunctionalState</a> <a id="943c17" class="tk">DMA_GetCmdStatus</a>(<a id="943c34" class="tk">DMA_Stream_TypeDef</a><a id="943c52" class="tk">*</a> <a id="943c54" class="tk">DMAy_Streamx</a>)</td></tr>
+<tr name="944" id="944">
+<td>944</td><td><span class="br">{</span></td></tr>
+<tr name="945" id="945">
+<td>945</td><td>  <a id="945c3" class="tk">FunctionalState</a> <a id="945c19" class="tk">state</a> = <a id="945c27" class="tk">DISABLE</a>;</td></tr>
+<tr name="946" id="946">
+<td>946</td><td></td></tr>
+<tr name="947" id="947">
+<td>947</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="948" id="948">
+<td>948</td><td>  <a id="948c3" class="tk">assert_param</a>(<a id="948c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="948c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="949" id="949">
+<td>949</td><td></td></tr>
+<tr name="950" id="950">
+<td>950</td><td>  <span class="kw">if</span> ((<a id="950c8" class="tk">DMAy_Streamx</a>-&gt;<a id="950c22" class="tk">CR</a> <a id="950c25" class="tk">&amp;</a> (<a id="950c28" class="tk">uint32_t</a>)<a id="950c37" class="tk">DMA_SxCR_EN</a>) <a id="950c50" class="tk">!=</a> 0)</td></tr>
+<tr name="951" id="951">
+<td>951</td><td>  <span class="br">{</span></td></tr>
+<tr name="952" id="952">
+<td>952</td><td>    <span class="ct">/* The selected DMAy Streamx EN bit is set (DMA is still transferring) */</span></td></tr>
+<tr name="953" id="953">
+<td>953</td><td>    <a id="953c5" class="tk">state</a> = <a id="953c13" class="tk">ENABLE</a>;</td></tr>
+<tr name="954" id="954">
+<td>954</td><td>  <span class="br">}</span></td></tr>
+<tr name="955" id="955">
+<td>955</td><td>  <span class="kw">else</span></td></tr>
+<tr name="956" id="956">
+<td>956</td><td>  <span class="br">{</span></td></tr>
+<tr name="957" id="957">
+<td>957</td><td>    <span class="ct">/* The selected DMAy Streamx EN bit is cleared (DMA is disabled and </span></td></tr>
+<tr name="958" id="958">
+<td>958</td><td><span class="ct">        all transfers are complete) */</span></td></tr>
+<tr name="959" id="959">
+<td>959</td><td>    <a id="959c5" class="tk">state</a> = <a id="959c13" class="tk">DISABLE</a>;</td></tr>
+<tr name="960" id="960">
+<td>960</td><td>  <span class="br">}</span></td></tr>
+<tr name="961" id="961">
+<td>961</td><td>  <span class="kw">return</span> <a id="961c10" class="tk">state</a>;</td></tr>
+<tr name="962" id="962">
+<td>962</td><td><span class="br">}</span></td></tr>
+<tr name="963" id="963">
+<td>963</td><td></td></tr>
+<tr name="964" id="964">
+<td>964</td><td><span class="ct">/**</span></td></tr>
+<tr name="965" id="965">
+<td>965</td><td><span class="ct">  * @brief  Returns the current DMAy Streamx FIFO filled level.</span></td></tr>
+<tr name="966" id="966">
+<td>966</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0 </span></td></tr>
+<tr name="967" id="967">
+<td>967</td><td><span class="ct">  *         to 7 to select the DMA Stream.</span></td></tr>
+<tr name="968" id="968">
+<td>968</td><td><span class="ct">  * @retval The FIFO filling state.</span></td></tr>
+<tr name="969" id="969">
+<td>969</td><td><span class="ct">  *           - DMA_FIFOStatus_Less1QuarterFull: when FIFO is less than 1 quarter-full </span></td></tr>
+<tr name="970" id="970">
+<td>970</td><td><span class="ct">  *                                               and not empty.</span></td></tr>
+<tr name="971" id="971">
+<td>971</td><td><span class="ct">  *           - DMA_FIFOStatus_1QuarterFull: if more than 1 quarter-full.</span></td></tr>
+<tr name="972" id="972">
+<td>972</td><td><span class="ct">  *           - DMA_FIFOStatus_HalfFull: if more than 1 half-full.</span></td></tr>
+<tr name="973" id="973">
+<td>973</td><td><span class="ct">  *           - DMA_FIFOStatus_3QuartersFull: if more than 3 quarters-full.</span></td></tr>
+<tr name="974" id="974">
+<td>974</td><td><span class="ct">  *           - DMA_FIFOStatus_Empty: when FIFO is empty</span></td></tr>
+<tr name="975" id="975">
+<td>975</td><td><span class="ct">  *           - DMA_FIFOStatus_Full: when FIFO is full</span></td></tr>
+<tr name="976" id="976">
+<td>976</td><td><span class="ct">  */</span></td></tr>
+<tr name="977" id="977">
+<td>977</td><td><a id="977c1" class="tk">uint32_t</a> <a id="977c10" class="tk">DMA_GetFIFOStatus</a>(<a id="977c28" class="tk">DMA_Stream_TypeDef</a><a id="977c46" class="tk">*</a> <a id="977c48" class="tk">DMAy_Streamx</a>)</td></tr>
+<tr name="978" id="978">
+<td>978</td><td><span class="br">{</span></td></tr>
+<tr name="979" id="979">
+<td>979</td><td>  <a id="979c3" class="tk">uint32_t</a> <a id="979c12" class="tk">tmpreg</a> = 0;</td></tr>
+<tr name="980" id="980">
+<td>980</td><td> </td></tr>
+<tr name="981" id="981">
+<td>981</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="982" id="982">
+<td>982</td><td>  <a id="982c3" class="tk">assert_param</a>(<a id="982c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="982c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="983" id="983">
+<td>983</td><td>  </td></tr>
+<tr name="984" id="984">
+<td>984</td><td>  <span class="ct">/* Get the FIFO level bits */</span></td></tr>
+<tr name="985" id="985">
+<td>985</td><td>  <a id="985c3" class="tk">tmpreg</a> = (<a id="985c13" class="tk">uint32_t</a>)((<a id="985c24" class="tk">DMAy_Streamx</a>-&gt;<a id="985c38" class="tk">FCR</a> <a id="985c42" class="tk">&amp;</a> <a id="985c44" class="tk">DMA_SxFCR_FS</a>));</td></tr>
+<tr name="986" id="986">
+<td>986</td><td>  </td></tr>
+<tr name="987" id="987">
+<td>987</td><td>  <span class="kw">return</span> <a id="987c10" class="tk">tmpreg</a>;</td></tr>
+<tr name="988" id="988">
+<td>988</td><td><span class="br">}</span></td></tr>
+<tr name="989" id="989">
+<td>989</td><td></td></tr>
+<tr name="990" id="990">
+<td>990</td><td><span class="ct">/**</span></td></tr>
+<tr name="991" id="991">
+<td>991</td><td><span class="ct">  * @brief  Checks whether the specified DMAy Streamx flag is set or not.</span></td></tr>
+<tr name="992" id="992">
+<td>992</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="993" id="993">
+<td>993</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="994" id="994">
+<td>994</td><td><span class="ct">  * @param  DMA_FLAG: specifies the flag to check.</span></td></tr>
+<tr name="995" id="995">
+<td>995</td><td><span class="ct">  *          This parameter can be one of the following values:</span></td></tr>
+<tr name="996" id="996">
+<td>996</td><td><span class="ct">  *            @arg DMA_FLAG_TCIFx:  Streamx transfer complete flag</span></td></tr>
+<tr name="997" id="997">
+<td>997</td><td><span class="ct">  *            @arg DMA_FLAG_HTIFx:  Streamx half transfer complete flag</span></td></tr>
+<tr name="998" id="998">
+<td>998</td><td><span class="ct">  *            @arg DMA_FLAG_TEIFx:  Streamx transfer error flag</span></td></tr>
+<tr name="999" id="999">
+<td>999</td><td><span class="ct">  *            @arg DMA_FLAG_DMEIFx: Streamx direct mode error flag</span></td></tr>
+<tr name="1000" id="1000">
+<td>1000</td><td><span class="ct">  *            @arg DMA_FLAG_FEIFx:  Streamx FIFO error flag</span></td></tr>
+<tr name="1001" id="1001">
+<td>1001</td><td><span class="ct">  *         Where x can be 0 to 7 to select the DMA Stream.</span></td></tr>
+<tr name="1002" id="1002">
+<td>1002</td><td><span class="ct">  * @retval The new state of DMA_FLAG (SET or RESET).</span></td></tr>
+<tr name="1003" id="1003">
+<td>1003</td><td><span class="ct">  */</span></td></tr>
+<tr name="1004" id="1004">
+<td>1004</td><td><a id="1004c1" class="tk">FlagStatus</a> <a id="1004c12" class="tk">DMA_GetFlagStatus</a>(<a id="1004c30" class="tk">DMA_Stream_TypeDef</a><a id="1004c48" class="tk">*</a> <a id="1004c50" class="tk">DMAy_Streamx</a>, <a id="1004c64" class="tk">uint32_t</a> <a id="1004c73" class="tk">DMA_FLAG</a>)</td></tr>
+<tr name="1005" id="1005">
+<td>1005</td><td><span class="br">{</span></td></tr>
+<tr name="1006" id="1006">
+<td>1006</td><td>  <a id="1006c3" class="tk">FlagStatus</a> <a id="1006c14" class="tk">bitstatus</a> = <a id="1006c26" class="tk">RESET</a>;</td></tr>
+<tr name="1007" id="1007">
+<td>1007</td><td>  <a id="1007c3" class="tk">DMA_TypeDef</a><a id="1007c14" class="tk">*</a> <a id="1007c16" class="tk">DMAy</a>;</td></tr>
+<tr name="1008" id="1008">
+<td>1008</td><td>  <a id="1008c3" class="tk">uint32_t</a> <a id="1008c12" class="tk">tmpreg</a> = 0;</td></tr>
+<tr name="1009" id="1009">
+<td>1009</td><td></td></tr>
+<tr name="1010" id="1010">
+<td>1010</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="1011" id="1011">
+<td>1011</td><td>  <a id="1011c3" class="tk">assert_param</a>(<a id="1011c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="1011c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="1012" id="1012">
+<td>1012</td><td>  <a id="1012c3" class="tk">assert_param</a>(<a id="1012c16" class="tk">IS_DMA_GET_FLAG</a>(<a id="1012c32" class="tk">DMA_FLAG</a>));</td></tr>
+<tr name="1013" id="1013">
+<td>1013</td><td></td></tr>
+<tr name="1014" id="1014">
+<td>1014</td><td>  <span class="ct">/* Determine the DMA to which belongs the stream */</span></td></tr>
+<tr name="1015" id="1015">
+<td>1015</td><td>  <span class="kw">if</span> (<a id="1015c7" class="tk">DMAy_Streamx</a> <a id="1015c20" class="tk">&lt;</a> <a id="1015c22" class="tk">DMA2_Stream0</a>)</td></tr>
+<tr name="1016" id="1016">
+<td>1016</td><td>  <span class="br">{</span></td></tr>
+<tr name="1017" id="1017">
+<td>1017</td><td>    <span class="ct">/* DMAy_Streamx belongs to DMA1 */</span></td></tr>
+<tr name="1018" id="1018">
+<td>1018</td><td>    <a id="1018c5" class="tk">DMAy</a> = <a id="1018c12" class="tk">DMA1</a>; </td></tr>
+<tr name="1019" id="1019">
+<td>1019</td><td>  <span class="br">}</span> </td></tr>
+<tr name="1020" id="1020">
+<td>1020</td><td>  <span class="kw">else</span> </td></tr>
+<tr name="1021" id="1021">
+<td>1021</td><td>  <span class="br">{</span></td></tr>
+<tr name="1022" id="1022">
+<td>1022</td><td>    <span class="ct">/* DMAy_Streamx belongs to DMA2 */</span></td></tr>
+<tr name="1023" id="1023">
+<td>1023</td><td>    <a id="1023c5" class="tk">DMAy</a> = <a id="1023c12" class="tk">DMA2</a>; </td></tr>
+<tr name="1024" id="1024">
+<td>1024</td><td>  <span class="br">}</span></td></tr>
+<tr name="1025" id="1025">
+<td>1025</td><td></td></tr>
+<tr name="1026" id="1026">
+<td>1026</td><td>  <span class="ct">/* Check if the flag is in HISR or LISR */</span></td></tr>
+<tr name="1027" id="1027">
+<td>1027</td><td>  <span class="kw">if</span> ((<a id="1027c8" class="tk">DMA_FLAG</a> <a id="1027c17" class="tk">&amp;</a> <a id="1027c19" class="tk">HIGH_ISR_MASK</a>) <a id="1027c34" class="tk">!=</a> (<a id="1027c38" class="tk">uint32_t</a>)<a id="1027c47" class="tk">RESET</a>)</td></tr>
+<tr name="1028" id="1028">
+<td>1028</td><td>  <span class="br">{</span></td></tr>
+<tr name="1029" id="1029">
+<td>1029</td><td>    <span class="ct">/* Get DMAy HISR register value */</span></td></tr>
+<tr name="1030" id="1030">
+<td>1030</td><td>    <a id="1030c5" class="tk">tmpreg</a> = <a id="1030c14" class="tk">DMAy</a>-&gt;<a id="1030c20" class="tk">HISR</a>;</td></tr>
+<tr name="1031" id="1031">
+<td>1031</td><td>  <span class="br">}</span></td></tr>
+<tr name="1032" id="1032">
+<td>1032</td><td>  <span class="kw">else</span></td></tr>
+<tr name="1033" id="1033">
+<td>1033</td><td>  <span class="br">{</span></td></tr>
+<tr name="1034" id="1034">
+<td>1034</td><td>    <span class="ct">/* Get DMAy LISR register value */</span></td></tr>
+<tr name="1035" id="1035">
+<td>1035</td><td>    <a id="1035c5" class="tk">tmpreg</a> = <a id="1035c14" class="tk">DMAy</a>-&gt;<a id="1035c20" class="tk">LISR</a>;</td></tr>
+<tr name="1036" id="1036">
+<td>1036</td><td>  <span class="br">}</span>   </td></tr>
+<tr name="1037" id="1037">
+<td>1037</td><td> </td></tr>
+<tr name="1038" id="1038">
+<td>1038</td><td>  <span class="ct">/* Mask the reserved bits */</span></td></tr>
+<tr name="1039" id="1039">
+<td>1039</td><td>  <a id="1039c3" class="tk">tmpreg</a> <a id="1039c10" class="tk">&amp;=</a> (<a id="1039c14" class="tk">uint32_t</a>)<a id="1039c23" class="tk">RESERVED_MASK</a>;</td></tr>
+<tr name="1040" id="1040">
+<td>1040</td><td></td></tr>
+<tr name="1041" id="1041">
+<td>1041</td><td>  <span class="ct">/* Check the status of the specified DMA flag */</span></td></tr>
+<tr name="1042" id="1042">
+<td>1042</td><td>  <span class="kw">if</span> ((<a id="1042c8" class="tk">tmpreg</a> <a id="1042c15" class="tk">&amp;</a> <a id="1042c17" class="tk">DMA_FLAG</a>) <a id="1042c27" class="tk">!=</a> (<a id="1042c31" class="tk">uint32_t</a>)<a id="1042c40" class="tk">RESET</a>)</td></tr>
+<tr name="1043" id="1043">
+<td>1043</td><td>  <span class="br">{</span></td></tr>
+<tr name="1044" id="1044">
+<td>1044</td><td>    <span class="ct">/* DMA_FLAG is set */</span></td></tr>
+<tr name="1045" id="1045">
+<td>1045</td><td>    <a id="1045c5" class="tk">bitstatus</a> = <a id="1045c17" class="tk">SET</a>;</td></tr>
+<tr name="1046" id="1046">
+<td>1046</td><td>  <span class="br">}</span></td></tr>
+<tr name="1047" id="1047">
+<td>1047</td><td>  <span class="kw">else</span></td></tr>
+<tr name="1048" id="1048">
+<td>1048</td><td>  <span class="br">{</span></td></tr>
+<tr name="1049" id="1049">
+<td>1049</td><td>    <span class="ct">/* DMA_FLAG is reset */</span></td></tr>
+<tr name="1050" id="1050">
+<td>1050</td><td>    <a id="1050c5" class="tk">bitstatus</a> = <a id="1050c17" class="tk">RESET</a>;</td></tr>
+<tr name="1051" id="1051">
+<td>1051</td><td>  <span class="br">}</span></td></tr>
+<tr name="1052" id="1052">
+<td>1052</td><td></td></tr>
+<tr name="1053" id="1053">
+<td>1053</td><td>  <span class="ct">/* Return the DMA_FLAG status */</span></td></tr>
+<tr name="1054" id="1054">
+<td>1054</td><td>  <span class="kw">return</span>  <a id="1054c11" class="tk">bitstatus</a>;</td></tr>
+<tr name="1055" id="1055">
+<td>1055</td><td><span class="br">}</span></td></tr>
+<tr name="1056" id="1056">
+<td>1056</td><td></td></tr>
+<tr name="1057" id="1057">
+<td>1057</td><td><span class="ct">/**</span></td></tr>
+<tr name="1058" id="1058">
+<td>1058</td><td><span class="ct">  * @brief  Clears the DMAy Streamx's pending flags.</span></td></tr>
+<tr name="1059" id="1059">
+<td>1059</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="1060" id="1060">
+<td>1060</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="1061" id="1061">
+<td>1061</td><td><span class="ct">  * @param  DMA_FLAG: specifies the flag to clear.</span></td></tr>
+<tr name="1062" id="1062">
+<td>1062</td><td><span class="ct">  *          This parameter can be any combination of the following values:</span></td></tr>
+<tr name="1063" id="1063">
+<td>1063</td><td><span class="ct">  *            @arg DMA_FLAG_TCIFx:  Streamx transfer complete flag</span></td></tr>
+<tr name="1064" id="1064">
+<td>1064</td><td><span class="ct">  *            @arg DMA_FLAG_HTIFx:  Streamx half transfer complete flag</span></td></tr>
+<tr name="1065" id="1065">
+<td>1065</td><td><span class="ct">  *            @arg DMA_FLAG_TEIFx:  Streamx transfer error flag</span></td></tr>
+<tr name="1066" id="1066">
+<td>1066</td><td><span class="ct">  *            @arg DMA_FLAG_DMEIFx: Streamx direct mode error flag</span></td></tr>
+<tr name="1067" id="1067">
+<td>1067</td><td><span class="ct">  *            @arg DMA_FLAG_FEIFx:  Streamx FIFO error flag</span></td></tr>
+<tr name="1068" id="1068">
+<td>1068</td><td><span class="ct">  *         Where x can be 0 to 7 to select the DMA Stream.   </span></td></tr>
+<tr name="1069" id="1069">
+<td>1069</td><td><span class="ct">  * @retval None</span></td></tr>
+<tr name="1070" id="1070">
+<td>1070</td><td><span class="ct">  */</span></td></tr>
+<tr name="1071" id="1071">
+<td>1071</td><td><span class="kw">void</span> <a id="1071c6" class="tk">DMA_ClearFlag</a>(<a id="1071c20" class="tk">DMA_Stream_TypeDef</a><a id="1071c38" class="tk">*</a> <a id="1071c40" class="tk">DMAy_Streamx</a>, <a id="1071c54" class="tk">uint32_t</a> <a id="1071c63" class="tk">DMA_FLAG</a>)</td></tr>
+<tr name="1072" id="1072">
+<td>1072</td><td><span class="br">{</span></td></tr>
+<tr name="1073" id="1073">
+<td>1073</td><td>  <a id="1073c3" class="tk">DMA_TypeDef</a><a id="1073c14" class="tk">*</a> <a id="1073c16" class="tk">DMAy</a>;</td></tr>
+<tr name="1074" id="1074">
+<td>1074</td><td></td></tr>
+<tr name="1075" id="1075">
+<td>1075</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="1076" id="1076">
+<td>1076</td><td>  <a id="1076c3" class="tk">assert_param</a>(<a id="1076c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="1076c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="1077" id="1077">
+<td>1077</td><td>  <a id="1077c3" class="tk">assert_param</a>(<a id="1077c16" class="tk">IS_DMA_CLEAR_FLAG</a>(<a id="1077c34" class="tk">DMA_FLAG</a>));</td></tr>
+<tr name="1078" id="1078">
+<td>1078</td><td></td></tr>
+<tr name="1079" id="1079">
+<td>1079</td><td>  <span class="ct">/* Determine the DMA to which belongs the stream */</span></td></tr>
+<tr name="1080" id="1080">
+<td>1080</td><td>  <span class="kw">if</span> (<a id="1080c7" class="tk">DMAy_Streamx</a> <a id="1080c20" class="tk">&lt;</a> <a id="1080c22" class="tk">DMA2_Stream0</a>)</td></tr>
+<tr name="1081" id="1081">
+<td>1081</td><td>  <span class="br">{</span></td></tr>
+<tr name="1082" id="1082">
+<td>1082</td><td>    <span class="ct">/* DMAy_Streamx belongs to DMA1 */</span></td></tr>
+<tr name="1083" id="1083">
+<td>1083</td><td>    <a id="1083c5" class="tk">DMAy</a> = <a id="1083c12" class="tk">DMA1</a>; </td></tr>
+<tr name="1084" id="1084">
+<td>1084</td><td>  <span class="br">}</span> </td></tr>
+<tr name="1085" id="1085">
+<td>1085</td><td>  <span class="kw">else</span> </td></tr>
+<tr name="1086" id="1086">
+<td>1086</td><td>  <span class="br">{</span></td></tr>
+<tr name="1087" id="1087">
+<td>1087</td><td>    <span class="ct">/* DMAy_Streamx belongs to DMA2 */</span></td></tr>
+<tr name="1088" id="1088">
+<td>1088</td><td>    <a id="1088c5" class="tk">DMAy</a> = <a id="1088c12" class="tk">DMA2</a>; </td></tr>
+<tr name="1089" id="1089">
+<td>1089</td><td>  <span class="br">}</span></td></tr>
+<tr name="1090" id="1090">
+<td>1090</td><td></td></tr>
+<tr name="1091" id="1091">
+<td>1091</td><td>  <span class="ct">/* Check if LIFCR or HIFCR register is targeted */</span></td></tr>
+<tr name="1092" id="1092">
+<td>1092</td><td>  <span class="kw">if</span> ((<a id="1092c8" class="tk">DMA_FLAG</a> <a id="1092c17" class="tk">&amp;</a> <a id="1092c19" class="tk">HIGH_ISR_MASK</a>) <a id="1092c34" class="tk">!=</a> (<a id="1092c38" class="tk">uint32_t</a>)<a id="1092c47" class="tk">RESET</a>)</td></tr>
+<tr name="1093" id="1093">
+<td>1093</td><td>  <span class="br">{</span></td></tr>
+<tr name="1094" id="1094">
+<td>1094</td><td>    <span class="ct">/* Set DMAy HIFCR register clear flag bits */</span></td></tr>
+<tr name="1095" id="1095">
+<td>1095</td><td>    <a id="1095c5" class="tk">DMAy</a>-&gt;<a id="1095c11" class="tk">HIFCR</a> = (<a id="1095c20" class="tk">uint32_t</a>)(<a id="1095c30" class="tk">DMA_FLAG</a> <a id="1095c39" class="tk">&amp;</a> <a id="1095c41" class="tk">RESERVED_MASK</a>);</td></tr>
+<tr name="1096" id="1096">
+<td>1096</td><td>  <span class="br">}</span></td></tr>
+<tr name="1097" id="1097">
+<td>1097</td><td>  <span class="kw">else</span> </td></tr>
+<tr name="1098" id="1098">
+<td>1098</td><td>  <span class="br">{</span></td></tr>
+<tr name="1099" id="1099">
+<td>1099</td><td>    <span class="ct">/* Set DMAy LIFCR register clear flag bits */</span></td></tr>
+<tr name="1100" id="1100">
+<td>1100</td><td>    <a id="1100c5" class="tk">DMAy</a>-&gt;<a id="1100c11" class="tk">LIFCR</a> = (<a id="1100c20" class="tk">uint32_t</a>)(<a id="1100c30" class="tk">DMA_FLAG</a> <a id="1100c39" class="tk">&amp;</a> <a id="1100c41" class="tk">RESERVED_MASK</a>);</td></tr>
+<tr name="1101" id="1101">
+<td>1101</td><td>  <span class="br">}</span>    </td></tr>
+<tr name="1102" id="1102">
+<td>1102</td><td><span class="br">}</span></td></tr>
+<tr name="1103" id="1103">
+<td>1103</td><td></td></tr>
+<tr name="1104" id="1104">
+<td>1104</td><td><span class="ct">/**</span></td></tr>
+<tr name="1105" id="1105">
+<td>1105</td><td><span class="ct">  * @brief  Enables or disables the specified DMAy Streamx interrupts.</span></td></tr>
+<tr name="1106" id="1106">
+<td>1106</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="1107" id="1107">
+<td>1107</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="1108" id="1108">
+<td>1108</td><td><span class="ct">  * @param DMA_IT: specifies the DMA interrupt sources to be enabled or disabled. </span></td></tr>
+<tr name="1109" id="1109">
+<td>1109</td><td><span class="ct">  *          This parameter can be any combination of the following values:</span></td></tr>
+<tr name="1110" id="1110">
+<td>1110</td><td><span class="ct">  *            @arg DMA_IT_TC:  Transfer complete interrupt mask</span></td></tr>
+<tr name="1111" id="1111">
+<td>1111</td><td><span class="ct">  *            @arg DMA_IT_HT:  Half transfer complete interrupt mask</span></td></tr>
+<tr name="1112" id="1112">
+<td>1112</td><td><span class="ct">  *            @arg DMA_IT_TE:  Transfer error interrupt mask</span></td></tr>
+<tr name="1113" id="1113">
+<td>1113</td><td><span class="ct">  *            @arg DMA_IT_FE:  FIFO error interrupt mask</span></td></tr>
+<tr name="1114" id="1114">
+<td>1114</td><td><span class="ct">  * @param  NewState: new state of the specified DMA interrupts.</span></td></tr>
+<tr name="1115" id="1115">
+<td>1115</td><td><span class="ct">  *          This parameter can be: ENABLE or DISABLE.</span></td></tr>
+<tr name="1116" id="1116">
+<td>1116</td><td><span class="ct">  * @retval None</span></td></tr>
+<tr name="1117" id="1117">
+<td>1117</td><td><span class="ct">  */</span></td></tr>
+<tr name="1118" id="1118">
+<td>1118</td><td><span class="kw">void</span> <a id="1118c6" class="tk">DMA_ITConfig</a>(<a id="1118c19" class="tk">DMA_Stream_TypeDef</a><a id="1118c37" class="tk">*</a> <a id="1118c39" class="tk">DMAy_Streamx</a>, <a id="1118c53" class="tk">uint32_t</a> <a id="1118c62" class="tk">DMA_IT</a>, <a id="1118c70" class="tk">FunctionalState</a> <a id="1118c86" class="tk">NewState</a>)</td></tr>
+<tr name="1119" id="1119">
+<td>1119</td><td><span class="br">{</span></td></tr>
+<tr name="1120" id="1120">
+<td>1120</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="1121" id="1121">
+<td>1121</td><td>  <a id="1121c3" class="tk">assert_param</a>(<a id="1121c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="1121c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="1122" id="1122">
+<td>1122</td><td>  <a id="1122c3" class="tk">assert_param</a>(<a id="1122c16" class="tk">IS_DMA_CONFIG_IT</a>(<a id="1122c33" class="tk">DMA_IT</a>));</td></tr>
+<tr name="1123" id="1123">
+<td>1123</td><td>  <a id="1123c3" class="tk">assert_param</a>(<a id="1123c16" class="tk">IS_FUNCTIONAL_STATE</a>(<a id="1123c36" class="tk">NewState</a>));</td></tr>
+<tr name="1124" id="1124">
+<td>1124</td><td></td></tr>
+<tr name="1125" id="1125">
+<td>1125</td><td>  <span class="ct">/* Check if the DMA_IT parameter contains a FIFO interrupt */</span></td></tr>
+<tr name="1126" id="1126">
+<td>1126</td><td>  <span class="kw">if</span> ((<a id="1126c8" class="tk">DMA_IT</a> <a id="1126c15" class="tk">&amp;</a> <a id="1126c17" class="tk">DMA_IT_FE</a>) <a id="1126c28" class="tk">!=</a> 0)</td></tr>
+<tr name="1127" id="1127">
+<td>1127</td><td>  <span class="br">{</span></td></tr>
+<tr name="1128" id="1128">
+<td>1128</td><td>    <span class="kw">if</span> (<a id="1128c9" class="tk">NewState</a> <a id="1128c18" class="tk">!=</a> <a id="1128c21" class="tk">DISABLE</a>)</td></tr>
+<tr name="1129" id="1129">
+<td>1129</td><td>    <span class="br">{</span></td></tr>
+<tr name="1130" id="1130">
+<td>1130</td><td>      <span class="ct">/* Enable the selected DMA FIFO interrupts */</span></td></tr>
+<tr name="1131" id="1131">
+<td>1131</td><td>      <a id="1131c7" class="tk">DMAy_Streamx</a>-&gt;<a id="1131c21" class="tk">FCR</a> <a id="1131c25" class="tk">|=</a> (<a id="1131c29" class="tk">uint32_t</a>)<a id="1131c38" class="tk">DMA_IT_FE</a>;</td></tr>
+<tr name="1132" id="1132">
+<td>1132</td><td>    <span class="br">}</span>    </td></tr>
+<tr name="1133" id="1133">
+<td>1133</td><td>    <span class="kw">else</span> </td></tr>
+<tr name="1134" id="1134">
+<td>1134</td><td>    <span class="br">{</span></td></tr>
+<tr name="1135" id="1135">
+<td>1135</td><td>      <span class="ct">/* Disable the selected DMA FIFO interrupts */</span></td></tr>
+<tr name="1136" id="1136">
+<td>1136</td><td>      <a id="1136c7" class="tk">DMAy_Streamx</a>-&gt;<a id="1136c21" class="tk">FCR</a> <a id="1136c25" class="tk">&amp;=</a> <a id="1136c28" class="tk">~</a>(<a id="1136c30" class="tk">uint32_t</a>)<a id="1136c39" class="tk">DMA_IT_FE</a>;  </td></tr>
+<tr name="1137" id="1137">
+<td>1137</td><td>    <span class="br">}</span></td></tr>
+<tr name="1138" id="1138">
+<td>1138</td><td>  <span class="br">}</span></td></tr>
+<tr name="1139" id="1139">
+<td>1139</td><td></td></tr>
+<tr name="1140" id="1140">
+<td>1140</td><td>  <span class="ct">/* Check if the DMA_IT parameter contains a Transfer interrupt */</span></td></tr>
+<tr name="1141" id="1141">
+<td>1141</td><td>  <span class="kw">if</span> (<a id="1141c7" class="tk">DMA_IT</a> <a id="1141c14" class="tk">!=</a> <a id="1141c17" class="tk">DMA_IT_FE</a>)</td></tr>
+<tr name="1142" id="1142">
+<td>1142</td><td>  <span class="br">{</span></td></tr>
+<tr name="1143" id="1143">
+<td>1143</td><td>    <span class="kw">if</span> (<a id="1143c9" class="tk">NewState</a> <a id="1143c18" class="tk">!=</a> <a id="1143c21" class="tk">DISABLE</a>)</td></tr>
+<tr name="1144" id="1144">
+<td>1144</td><td>    <span class="br">{</span></td></tr>
+<tr name="1145" id="1145">
+<td>1145</td><td>      <span class="ct">/* Enable the selected DMA transfer interrupts */</span></td></tr>
+<tr name="1146" id="1146">
+<td>1146</td><td>      <a id="1146c7" class="tk">DMAy_Streamx</a>-&gt;<a id="1146c21" class="tk">CR</a> <a id="1146c24" class="tk">|=</a> (<a id="1146c28" class="tk">uint32_t</a>)(<a id="1146c38" class="tk">DMA_IT</a>  <a id="1146c46" class="tk">&amp;</a> <a id="1146c48" class="tk">TRANSFER_IT_ENABLE_MASK</a>);</td></tr>
+<tr name="1147" id="1147">
+<td>1147</td><td>    <span class="br">}</span></td></tr>
+<tr name="1148" id="1148">
+<td>1148</td><td>    <span class="kw">else</span></td></tr>
+<tr name="1149" id="1149">
+<td>1149</td><td>    <span class="br">{</span></td></tr>
+<tr name="1150" id="1150">
+<td>1150</td><td>      <span class="ct">/* Disable the selected DMA transfer interrupts */</span></td></tr>
+<tr name="1151" id="1151">
+<td>1151</td><td>      <a id="1151c7" class="tk">DMAy_Streamx</a>-&gt;<a id="1151c21" class="tk">CR</a> <a id="1151c24" class="tk">&amp;=</a> <a id="1151c27" class="tk">~</a>(<a id="1151c29" class="tk">uint32_t</a>)(<a id="1151c39" class="tk">DMA_IT</a> <a id="1151c46" class="tk">&amp;</a> <a id="1151c48" class="tk">TRANSFER_IT_ENABLE_MASK</a>);</td></tr>
+<tr name="1152" id="1152">
+<td>1152</td><td>    <span class="br">}</span>    </td></tr>
+<tr name="1153" id="1153">
+<td>1153</td><td>  <span class="br">}</span></td></tr>
+<tr name="1154" id="1154">
+<td>1154</td><td><span class="br">}</span></td></tr>
+<tr name="1155" id="1155">
+<td>1155</td><td></td></tr>
+<tr name="1156" id="1156">
+<td>1156</td><td><span class="ct">/**</span></td></tr>
+<tr name="1157" id="1157">
+<td>1157</td><td><span class="ct">  * @brief  Checks whether the specified DMAy Streamx interrupt has occurred or not.</span></td></tr>
+<tr name="1158" id="1158">
+<td>1158</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="1159" id="1159">
+<td>1159</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="1160" id="1160">
+<td>1160</td><td><span class="ct">  * @param  DMA_IT: specifies the DMA interrupt source to check.</span></td></tr>
+<tr name="1161" id="1161">
+<td>1161</td><td><span class="ct">  *          This parameter can be one of the following values:</span></td></tr>
+<tr name="1162" id="1162">
+<td>1162</td><td><span class="ct">  *            @arg DMA_IT_TCIFx:  Streamx transfer complete interrupt</span></td></tr>
+<tr name="1163" id="1163">
+<td>1163</td><td><span class="ct">  *            @arg DMA_IT_HTIFx:  Streamx half transfer complete interrupt</span></td></tr>
+<tr name="1164" id="1164">
+<td>1164</td><td><span class="ct">  *            @arg DMA_IT_TEIFx:  Streamx transfer error interrupt</span></td></tr>
+<tr name="1165" id="1165">
+<td>1165</td><td><span class="ct">  *            @arg DMA_IT_DMEIFx: Streamx direct mode error interrupt</span></td></tr>
+<tr name="1166" id="1166">
+<td>1166</td><td><span class="ct">  *            @arg DMA_IT_FEIFx:  Streamx FIFO error interrupt</span></td></tr>
+<tr name="1167" id="1167">
+<td>1167</td><td><span class="ct">  *         Where x can be 0 to 7 to select the DMA Stream.</span></td></tr>
+<tr name="1168" id="1168">
+<td>1168</td><td><span class="ct">  * @retval The new state of DMA_IT (SET or RESET).</span></td></tr>
+<tr name="1169" id="1169">
+<td>1169</td><td><span class="ct">  */</span></td></tr>
+<tr name="1170" id="1170">
+<td>1170</td><td><a id="1170c1" class="tk">ITStatus</a> <a id="1170c10" class="tk">DMA_GetITStatus</a>(<a id="1170c26" class="tk">DMA_Stream_TypeDef</a><a id="1170c44" class="tk">*</a> <a id="1170c46" class="tk">DMAy_Streamx</a>, <a id="1170c60" class="tk">uint32_t</a> <a id="1170c69" class="tk">DMA_IT</a>)</td></tr>
+<tr name="1171" id="1171">
+<td>1171</td><td><span class="br">{</span></td></tr>
+<tr name="1172" id="1172">
+<td>1172</td><td>  <a id="1172c3" class="tk">ITStatus</a> <a id="1172c12" class="tk">bitstatus</a> = <a id="1172c24" class="tk">RESET</a>;</td></tr>
+<tr name="1173" id="1173">
+<td>1173</td><td>  <a id="1173c3" class="tk">DMA_TypeDef</a><a id="1173c14" class="tk">*</a> <a id="1173c16" class="tk">DMAy</a>;</td></tr>
+<tr name="1174" id="1174">
+<td>1174</td><td>  <a id="1174c3" class="tk">uint32_t</a> <a id="1174c12" class="tk">tmpreg</a> = 0, <a id="1174c24" class="tk">enablestatus</a> = 0;</td></tr>
+<tr name="1175" id="1175">
+<td>1175</td><td></td></tr>
+<tr name="1176" id="1176">
+<td>1176</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="1177" id="1177">
+<td>1177</td><td>  <a id="1177c3" class="tk">assert_param</a>(<a id="1177c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="1177c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="1178" id="1178">
+<td>1178</td><td>  <a id="1178c3" class="tk">assert_param</a>(<a id="1178c16" class="tk">IS_DMA_GET_IT</a>(<a id="1178c30" class="tk">DMA_IT</a>));</td></tr>
+<tr name="1179" id="1179">
+<td>1179</td><td> </td></tr>
+<tr name="1180" id="1180">
+<td>1180</td><td>  <span class="ct">/* Determine the DMA to which belongs the stream */</span></td></tr>
+<tr name="1181" id="1181">
+<td>1181</td><td>  <span class="kw">if</span> (<a id="1181c7" class="tk">DMAy_Streamx</a> <a id="1181c20" class="tk">&lt;</a> <a id="1181c22" class="tk">DMA2_Stream0</a>)</td></tr>
+<tr name="1182" id="1182">
+<td>1182</td><td>  <span class="br">{</span></td></tr>
+<tr name="1183" id="1183">
+<td>1183</td><td>    <span class="ct">/* DMAy_Streamx belongs to DMA1 */</span></td></tr>
+<tr name="1184" id="1184">
+<td>1184</td><td>    <a id="1184c5" class="tk">DMAy</a> = <a id="1184c12" class="tk">DMA1</a>; </td></tr>
+<tr name="1185" id="1185">
+<td>1185</td><td>  <span class="br">}</span> </td></tr>
+<tr name="1186" id="1186">
+<td>1186</td><td>  <span class="kw">else</span> </td></tr>
+<tr name="1187" id="1187">
+<td>1187</td><td>  <span class="br">{</span></td></tr>
+<tr name="1188" id="1188">
+<td>1188</td><td>    <span class="ct">/* DMAy_Streamx belongs to DMA2 */</span></td></tr>
+<tr name="1189" id="1189">
+<td>1189</td><td>    <a id="1189c5" class="tk">DMAy</a> = <a id="1189c12" class="tk">DMA2</a>; </td></tr>
+<tr name="1190" id="1190">
+<td>1190</td><td>  <span class="br">}</span></td></tr>
+<tr name="1191" id="1191">
+<td>1191</td><td></td></tr>
+<tr name="1192" id="1192">
+<td>1192</td><td>  <span class="ct">/* Check if the interrupt enable bit is in the CR or FCR register */</span></td></tr>
+<tr name="1193" id="1193">
+<td>1193</td><td>  <span class="kw">if</span> ((<a id="1193c8" class="tk">DMA_IT</a> <a id="1193c15" class="tk">&amp;</a> <a id="1193c17" class="tk">TRANSFER_IT_MASK</a>) <a id="1193c35" class="tk">!=</a> (<a id="1193c39" class="tk">uint32_t</a>)<a id="1193c48" class="tk">RESET</a>)</td></tr>
+<tr name="1194" id="1194">
+<td>1194</td><td>  <span class="br">{</span></td></tr>
+<tr name="1195" id="1195">
+<td>1195</td><td>    <span class="ct">/* Get the interrupt enable position mask in CR register */</span></td></tr>
+<tr name="1196" id="1196">
+<td>1196</td><td>    <a id="1196c5" class="tk">tmpreg</a> = (<a id="1196c15" class="tk">uint32_t</a>)((<a id="1196c26" class="tk">DMA_IT</a> <a id="1196c33" class="tk">&gt;&gt;</a> 11) <a id="1196c40" class="tk">&amp;</a> <a id="1196c42" class="tk">TRANSFER_IT_ENABLE_MASK</a>);   </td></tr>
+<tr name="1197" id="1197">
+<td>1197</td><td>    </td></tr>
+<tr name="1198" id="1198">
+<td>1198</td><td>    <span class="ct">/* Check the enable bit in CR register */</span></td></tr>
+<tr name="1199" id="1199">
+<td>1199</td><td>    <a id="1199c5" class="tk">enablestatus</a> = (<a id="1199c21" class="tk">uint32_t</a>)(<a id="1199c31" class="tk">DMAy_Streamx</a>-&gt;<a id="1199c45" class="tk">CR</a> <a id="1199c48" class="tk">&amp;</a> <a id="1199c50" class="tk">tmpreg</a>);</td></tr>
+<tr name="1200" id="1200">
+<td>1200</td><td>  <span class="br">}</span></td></tr>
+<tr name="1201" id="1201">
+<td>1201</td><td>  <span class="kw">else</span> </td></tr>
+<tr name="1202" id="1202">
+<td>1202</td><td>  <span class="br">{</span></td></tr>
+<tr name="1203" id="1203">
+<td>1203</td><td>    <span class="ct">/* Check the enable bit in FCR register */</span></td></tr>
+<tr name="1204" id="1204">
+<td>1204</td><td>    <a id="1204c5" class="tk">enablestatus</a> = (<a id="1204c21" class="tk">uint32_t</a>)(<a id="1204c31" class="tk">DMAy_Streamx</a>-&gt;<a id="1204c45" class="tk">FCR</a> <a id="1204c49" class="tk">&amp;</a> <a id="1204c51" class="tk">DMA_IT_FE</a>); </td></tr>
+<tr name="1205" id="1205">
+<td>1205</td><td>  <span class="br">}</span></td></tr>
+<tr name="1206" id="1206">
+<td>1206</td><td> </td></tr>
+<tr name="1207" id="1207">
+<td>1207</td><td>  <span class="ct">/* Check if the interrupt pending flag is in LISR or HISR */</span></td></tr>
+<tr name="1208" id="1208">
+<td>1208</td><td>  <span class="kw">if</span> ((<a id="1208c8" class="tk">DMA_IT</a> <a id="1208c15" class="tk">&amp;</a> <a id="1208c17" class="tk">HIGH_ISR_MASK</a>) <a id="1208c32" class="tk">!=</a> (<a id="1208c36" class="tk">uint32_t</a>)<a id="1208c45" class="tk">RESET</a>)</td></tr>
+<tr name="1209" id="1209">
+<td>1209</td><td>  <span class="br">{</span></td></tr>
+<tr name="1210" id="1210">
+<td>1210</td><td>    <span class="ct">/* Get DMAy HISR register value */</span></td></tr>
+<tr name="1211" id="1211">
+<td>1211</td><td>    <a id="1211c5" class="tk">tmpreg</a> = <a id="1211c14" class="tk">DMAy</a>-&gt;<a id="1211c20" class="tk">HISR</a> ;</td></tr>
+<tr name="1212" id="1212">
+<td>1212</td><td>  <span class="br">}</span></td></tr>
+<tr name="1213" id="1213">
+<td>1213</td><td>  <span class="kw">else</span></td></tr>
+<tr name="1214" id="1214">
+<td>1214</td><td>  <span class="br">{</span></td></tr>
+<tr name="1215" id="1215">
+<td>1215</td><td>    <span class="ct">/* Get DMAy LISR register value */</span></td></tr>
+<tr name="1216" id="1216">
+<td>1216</td><td>    <a id="1216c5" class="tk">tmpreg</a> = <a id="1216c14" class="tk">DMAy</a>-&gt;<a id="1216c20" class="tk">LISR</a> ;</td></tr>
+<tr name="1217" id="1217">
+<td>1217</td><td>  <span class="br">}</span> </td></tr>
+<tr name="1218" id="1218">
+<td>1218</td><td></td></tr>
+<tr name="1219" id="1219">
+<td>1219</td><td>  <span class="ct">/* mask all reserved bits */</span></td></tr>
+<tr name="1220" id="1220">
+<td>1220</td><td>  <a id="1220c3" class="tk">tmpreg</a> <a id="1220c10" class="tk">&amp;=</a> (<a id="1220c14" class="tk">uint32_t</a>)<a id="1220c23" class="tk">RESERVED_MASK</a>;</td></tr>
+<tr name="1221" id="1221">
+<td>1221</td><td></td></tr>
+<tr name="1222" id="1222">
+<td>1222</td><td>  <span class="ct">/* Check the status of the specified DMA interrupt */</span></td></tr>
+<tr name="1223" id="1223">
+<td>1223</td><td>  <span class="kw">if</span> (((<a id="1223c9" class="tk">tmpreg</a> <a id="1223c16" class="tk">&amp;</a> <a id="1223c18" class="tk">DMA_IT</a>) <a id="1223c26" class="tk">!=</a> (<a id="1223c30" class="tk">uint32_t</a>)<a id="1223c39" class="tk">RESET</a>) <a id="1223c46" class="tk">&amp;&amp;</a> (<a id="1223c50" class="tk">enablestatus</a> <a id="1223c63" class="tk">!=</a> (<a id="1223c67" class="tk">uint32_t</a>)<a id="1223c76" class="tk">RESET</a>))</td></tr>
+<tr name="1224" id="1224">
+<td>1224</td><td>  <span class="br">{</span></td></tr>
+<tr name="1225" id="1225">
+<td>1225</td><td>    <span class="ct">/* DMA_IT is set */</span></td></tr>
+<tr name="1226" id="1226">
+<td>1226</td><td>    <a id="1226c5" class="tk">bitstatus</a> = <a id="1226c17" class="tk">SET</a>;</td></tr>
+<tr name="1227" id="1227">
+<td>1227</td><td>  <span class="br">}</span></td></tr>
+<tr name="1228" id="1228">
+<td>1228</td><td>  <span class="kw">else</span></td></tr>
+<tr name="1229" id="1229">
+<td>1229</td><td>  <span class="br">{</span></td></tr>
+<tr name="1230" id="1230">
+<td>1230</td><td>    <span class="ct">/* DMA_IT is reset */</span></td></tr>
+<tr name="1231" id="1231">
+<td>1231</td><td>    <a id="1231c5" class="tk">bitstatus</a> = <a id="1231c17" class="tk">RESET</a>;</td></tr>
+<tr name="1232" id="1232">
+<td>1232</td><td>  <span class="br">}</span></td></tr>
+<tr name="1233" id="1233">
+<td>1233</td><td></td></tr>
+<tr name="1234" id="1234">
+<td>1234</td><td>  <span class="ct">/* Return the DMA_IT status */</span></td></tr>
+<tr name="1235" id="1235">
+<td>1235</td><td>  <span class="kw">return</span>  <a id="1235c11" class="tk">bitstatus</a>;</td></tr>
+<tr name="1236" id="1236">
+<td>1236</td><td><span class="br">}</span></td></tr>
+<tr name="1237" id="1237">
+<td>1237</td><td></td></tr>
+<tr name="1238" id="1238">
+<td>1238</td><td><span class="ct">/**</span></td></tr>
+<tr name="1239" id="1239">
+<td>1239</td><td><span class="ct">  * @brief  Clears the DMAy Streamx's interrupt pending bits.</span></td></tr>
+<tr name="1240" id="1240">
+<td>1240</td><td><span class="ct">  * @param  DMAy_Streamx: where y can be 1 or 2 to select the DMA and x can be 0</span></td></tr>
+<tr name="1241" id="1241">
+<td>1241</td><td><span class="ct">  *          to 7 to select the DMA Stream.</span></td></tr>
+<tr name="1242" id="1242">
+<td>1242</td><td><span class="ct">  * @param  DMA_IT: specifies the DMA interrupt pending bit to clear.</span></td></tr>
+<tr name="1243" id="1243">
+<td>1243</td><td><span class="ct">  *          This parameter can be any combination of the following values:</span></td></tr>
+<tr name="1244" id="1244">
+<td>1244</td><td><span class="ct">  *            @arg DMA_IT_TCIFx:  Streamx transfer complete interrupt</span></td></tr>
+<tr name="1245" id="1245">
+<td>1245</td><td><span class="ct">  *            @arg DMA_IT_HTIFx:  Streamx half transfer complete interrupt</span></td></tr>
+<tr name="1246" id="1246">
+<td>1246</td><td><span class="ct">  *            @arg DMA_IT_TEIFx:  Streamx transfer error interrupt</span></td></tr>
+<tr name="1247" id="1247">
+<td>1247</td><td><span class="ct">  *            @arg DMA_IT_DMEIFx: Streamx direct mode error interrupt</span></td></tr>
+<tr name="1248" id="1248">
+<td>1248</td><td><span class="ct">  *            @arg DMA_IT_FEIFx:  Streamx FIFO error interrupt</span></td></tr>
+<tr name="1249" id="1249">
+<td>1249</td><td><span class="ct">  *         Where x can be 0 to 7 to select the DMA Stream.</span></td></tr>
+<tr name="1250" id="1250">
+<td>1250</td><td><span class="ct">  * @retval None</span></td></tr>
+<tr name="1251" id="1251">
+<td>1251</td><td><span class="ct">  */</span></td></tr>
+<tr name="1252" id="1252">
+<td>1252</td><td><span class="kw">void</span> <a id="1252c6" class="tk">DMA_ClearITPendingBit</a>(<a id="1252c28" class="tk">DMA_Stream_TypeDef</a><a id="1252c46" class="tk">*</a> <a id="1252c48" class="tk">DMAy_Streamx</a>, <a id="1252c62" class="tk">uint32_t</a> <a id="1252c71" class="tk">DMA_IT</a>)</td></tr>
+<tr name="1253" id="1253">
+<td>1253</td><td><span class="br">{</span></td></tr>
+<tr name="1254" id="1254">
+<td>1254</td><td>  <a id="1254c3" class="tk">DMA_TypeDef</a><a id="1254c14" class="tk">*</a> <a id="1254c16" class="tk">DMAy</a>;</td></tr>
+<tr name="1255" id="1255">
+<td>1255</td><td></td></tr>
+<tr name="1256" id="1256">
+<td>1256</td><td>  <span class="ct">/* Check the parameters */</span></td></tr>
+<tr name="1257" id="1257">
+<td>1257</td><td>  <a id="1257c3" class="tk">assert_param</a>(<a id="1257c16" class="tk">IS_DMA_ALL_PERIPH</a>(<a id="1257c34" class="tk">DMAy_Streamx</a>));</td></tr>
+<tr name="1258" id="1258">
+<td>1258</td><td>  <a id="1258c3" class="tk">assert_param</a>(<a id="1258c16" class="tk">IS_DMA_CLEAR_IT</a>(<a id="1258c32" class="tk">DMA_IT</a>));</td></tr>
+<tr name="1259" id="1259">
+<td>1259</td><td></td></tr>
+<tr name="1260" id="1260">
+<td>1260</td><td>  <span class="ct">/* Determine the DMA to which belongs the stream */</span></td></tr>
+<tr name="1261" id="1261">
+<td>1261</td><td>  <span class="kw">if</span> (<a id="1261c7" class="tk">DMAy_Streamx</a> <a id="1261c20" class="tk">&lt;</a> <a id="1261c22" class="tk">DMA2_Stream0</a>)</td></tr>
+<tr name="1262" id="1262">
+<td>1262</td><td>  <span class="br">{</span></td></tr>
+<tr name="1263" id="1263">
+<td>1263</td><td>    <span class="ct">/* DMAy_Streamx belongs to DMA1 */</span></td></tr>
+<tr name="1264" id="1264">
+<td>1264</td><td>    <a id="1264c5" class="tk">DMAy</a> = <a id="1264c12" class="tk">DMA1</a>; </td></tr>
+<tr name="1265" id="1265">
+<td>1265</td><td>  <span class="br">}</span> </td></tr>
+<tr name="1266" id="1266">
+<td>1266</td><td>  <span class="kw">else</span> </td></tr>
+<tr name="1267" id="1267">
+<td>1267</td><td>  <span class="br">{</span></td></tr>
+<tr name="1268" id="1268">
+<td>1268</td><td>    <span class="ct">/* DMAy_Streamx belongs to DMA2 */</span></td></tr>
+<tr name="1269" id="1269">
+<td>1269</td><td>    <a id="1269c5" class="tk">DMAy</a> = <a id="1269c12" class="tk">DMA2</a>; </td></tr>
+<tr name="1270" id="1270">
+<td>1270</td><td>  <span class="br">}</span></td></tr>
+<tr name="1271" id="1271">
+<td>1271</td><td></td></tr>
+<tr name="1272" id="1272">
+<td>1272</td><td>  <span class="ct">/* Check if LIFCR or HIFCR register is targeted */</span></td></tr>
+<tr name="1273" id="1273">
+<td>1273</td><td>  <span class="kw">if</span> ((<a id="1273c8" class="tk">DMA_IT</a> <a id="1273c15" class="tk">&amp;</a> <a id="1273c17" class="tk">HIGH_ISR_MASK</a>) <a id="1273c32" class="tk">!=</a> (<a id="1273c36" class="tk">uint32_t</a>)<a id="1273c45" class="tk">RESET</a>)</td></tr>
+<tr name="1274" id="1274">
+<td>1274</td><td>  <span class="br">{</span></td></tr>
+<tr name="1275" id="1275">
+<td>1275</td><td>    <span class="ct">/* Set DMAy HIFCR register clear interrupt bits */</span></td></tr>
+<tr name="1276" id="1276">
+<td>1276</td><td>    <a id="1276c5" class="tk">DMAy</a>-&gt;<a id="1276c11" class="tk">HIFCR</a> = (<a id="1276c20" class="tk">uint32_t</a>)(<a id="1276c30" class="tk">DMA_IT</a> <a id="1276c37" class="tk">&amp;</a> <a id="1276c39" class="tk">RESERVED_MASK</a>);</td></tr>
+<tr name="1277" id="1277">
+<td>1277</td><td>  <span class="br">}</span></td></tr>
+<tr name="1278" id="1278">
+<td>1278</td><td>  <span class="kw">else</span> </td></tr>
+<tr name="1279" id="1279">
+<td>1279</td><td>  <span class="br">{</span></td></tr>
+<tr name="1280" id="1280">
+<td>1280</td><td>    <span class="ct">/* Set DMAy LIFCR register clear interrupt bits */</span></td></tr>
+<tr name="1281" id="1281">
+<td>1281</td><td>    <a id="1281c5" class="tk">DMAy</a>-&gt;<a id="1281c11" class="tk">LIFCR</a> = (<a id="1281c20" class="tk">uint32_t</a>)(<a id="1281c30" class="tk">DMA_IT</a> <a id="1281c37" class="tk">&amp;</a> <a id="1281c39" class="tk">RESERVED_MASK</a>);</td></tr>
+<tr name="1282" id="1282">
+<td>1282</td><td>  <span class="br">}</span>   </td></tr>
+<tr name="1283" id="1283">
+<td>1283</td><td><span class="br">}</span></td></tr>
+<tr name="1284" id="1284">
+<td>1284</td><td></td></tr>
+<tr name="1285" id="1285">
+<td>1285</td><td><span class="ct">/**</span></td></tr>
+<tr name="1286" id="1286">
+<td>1286</td><td><span class="ct">  * @}</span></td></tr>
+<tr name="1287" id="1287">
+<td>1287</td><td><span class="ct">  */</span></td></tr>
+<tr name="1288" id="1288">
+<td>1288</td><td></td></tr>
+<tr name="1289" id="1289">
+<td>1289</td><td><span class="ct">/**</span></td></tr>
+<tr name="1290" id="1290">
+<td>1290</td><td><span class="ct">  * @}</span></td></tr>
+<tr name="1291" id="1291">
+<td>1291</td><td><span class="ct">  */</span></td></tr>
+<tr name="1292" id="1292">
+<td>1292</td><td></td></tr>
+<tr name="1293" id="1293">
+<td>1293</td><td><span class="ct">/**</span></td></tr>
+<tr name="1294" id="1294">
+<td>1294</td><td><span class="ct">  * @}</span></td></tr>
+<tr name="1295" id="1295">
+<td>1295</td><td><span class="ct">  */</span></td></tr>
+<tr name="1296" id="1296">
+<td>1296</td><td></td></tr>
+<tr name="1297" id="1297">
+<td>1297</td><td><span class="ct">/**</span></td></tr>
+<tr name="1298" id="1298">
+<td>1298</td><td><span class="ct">  * @}</span></td></tr>
+<tr name="1299" id="1299">
+<td>1299</td><td><span class="ct">  */</span></td></tr>
+<tr name="1300" id="1300">
+<td>1300</td><td></td></tr>
+<tr name="1301" id="1301">
+<td>1301</td><td><span class="ct">/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/</span></td></tr>
+<tr name="1302" id="1302">
+<td>1302</td><td></td></tr>
+</table>
+</pre>
+</body>
+</html>

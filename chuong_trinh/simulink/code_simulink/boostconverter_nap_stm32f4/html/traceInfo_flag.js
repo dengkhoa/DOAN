@@ -1,0 +1,30 @@
+function TraceInfoFlag() {
+    this.traceFlag = new Array();
+    this.traceFlag["boostconverter_nap.c:56c47"]=1;
+    this.traceFlag["boostconverter_nap.c:56c78"]=1;
+    this.traceFlag["boostconverter_nap.c:57c15"]=1;
+    this.traceFlag["boostconverter_nap.c:68c46"]=1;
+    this.traceFlag["boostconverter_nap.c:68c58"]=1;
+    this.traceFlag["boostconverter_nap.c:69c38"]=1;
+    this.traceFlag["boostconverter_nap.c:69c67"]=1;
+    this.traceFlag["boostconverter_nap.c:70c39"]=1;
+    this.traceFlag["boostconverter_nap.c:73c33"]=1;
+    this.traceFlag["boostconverter_nap.c:73c44"]=1;
+    this.traceFlag["boostconverter_nap.c:90c31"]=1;
+    this.traceFlag["boostconverter_nap.c:90c42"]=1;
+    this.traceFlag["boostconverter_nap.c:90c53"]=1;
+    this.traceFlag["boostconverter_nap.c:90c70"]=1;
+    this.traceFlag["boostconverter_nap.c:91c53"]=1;
+    this.traceFlag["boostconverter_nap.c:91c70"]=1;
+    this.traceFlag["boostconverter_nap.c:92c52"]=1;
+    this.traceFlag["boostconverter_nap.c:92c63"]=1;
+    this.traceFlag["boostconverter_nap.c:93c51"]=1;
+    this.traceFlag["boostconverter_nap.c:93c58"]=1;
+    this.traceFlag["boostconverter_nap.c:94c35"]=1;
+    this.traceFlag["boostconverter_nap.c:111c40"]=1;
+    this.traceFlag["boostconverter_nap.c:134c38"]=1;
+    this.traceFlag["boostconverter_nap.c:139c38"]=1;
+    this.traceFlag["boostconverter_nap.c:144c41"]=1;
+    this.traceFlag["boostconverter_nap.c:162c38"]=1;
+}
+top.TraceInfoFlag.instance = new TraceInfoFlag();
